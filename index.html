@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Peluqueria Pro</title>
+<style>
+:root {
+  --primary: #7c3aed; --primary-light: #a78bfa; --success: #10b981;
+  --danger: #ef4444; --warning: #f59e0b; --info: #3b82f6;
+  --bg: #f3f4f6; --text: #1f2937; --text-light: #6b7280; --border: #e5e7eb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+.header { background: white; padding: 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 20px; font-weight: 600; }
+.header-btn { background: none; border: none; font-size: 24px; cursor: pointer; padding: 5px; }
+.menu-btn { background: white; border: none; font-size: 24px; padding: 8px 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; }
+.sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: var(--primary); color: white; z-index: 1000; transition: left 0.3s; overflow-y: auto; }
+.sidebar.open { left: 0; }
+.sidebar-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); }
+.sidebar-header h2 { font-size: 20px; }
+.close-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+.sidebar-menu { padding: 10px; }
+.menu-item { padding: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; border-radius: 10px; transition: background 0.2s; font-size: 16px; }
+.menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.2); }
+.menu-item .icon { font-size: 20px; width: 24px; text-align: center; }
+.menu-item .badge { margin-left: auto; background: var(--danger); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+.overlay.show { display: block; }
+.container { padding: 15px; max-width: 800px; margin: 0 auto; }
+.alert-banner { background: #fef3c7; border: 1px solid #fbbf24; border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; cursor: pointer; }
+.alert-banner .icon { font-size: 24px; color: var(--warning); }
+.alert-banner .text { flex: 1; color: #92400e; font-weight: 500; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 15px; }
+.stat-card { border-radius: 16px; padding: 20px; color: white; position: relative; overflow: hidden; min-height: 110px; display: flex; flex-direction: column; justify-content: space-between; }
+.stat-card.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.stat-card.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.stat-card.green { background: linear-gradient(135deg, #10b981, #059669); }
+.stat-card.orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+.stat-card.pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+.stat-card.teal { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+.stat-card.red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.stat-card .value { font-size: 28px; font-weight: 700; }
+.stat-card .label { font-size: 13px; opacity: 0.9; }
+.stat-card .icon-big { position: absolute; right: 15px; top: 15px; font-size: 32px; opacity: 0.8; }
+.quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+.action-btn { padding: 15px; border-radius: 12px; border: 2px solid var(--border); background: white; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.action-btn.primary { background: var(--primary); color: white; border-color: var(--primary); }
+.section-card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }.section-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+.btn { padding: 12px 20px; border-radius: 10px; border: none; font-size: 15px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-success { background: var(--success); color: white; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-warning { background: var(--warning); color: white; }
+.btn-info { background: var(--info); color: white; }
+.btn-outline { background: white; border: 2px solid var(--border); color: var(--text); }
+.btn-full { width: 100%; justify-content: center; }
+.btn-sm { padding: 8px 12px; font-size: 13px; }
+.search-box { width: 100%; padding: 12px 15px; border: 2px solid var(--border); border-radius: 10px; font-size: 15px; margin-bottom: 15px; }
+.search-box:focus { outline: none; border-color: var(--primary); }
+.client-list { display: flex; flex-direction: column; gap: 10px; }
+.client-item { background: white; border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; border: 1px solid var(--border); }
+.client-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--primary-light); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; flex-shrink: 0; }
+.client-info { flex: 1; }
+.client-name { font-weight: 600; font-size: 15px; }
+.client-phone { font-size: 13px; color: var(--text-light); }
+.appointment-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid var(--border); }
+.appt-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.appt-time { font-size: 24px; font-weight: 700; color: var(--primary); }
+.appt-duration { font-size: 13px; color: var(--text-light); }
+.appt-client { font-weight: 600; font-size: 16px; }
+.appt-service { font-size: 14px; color: var(--text-light); margin-top: 4px; }
+.appt-price { font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 8px; }
+.status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-completed { background: #d1fae5; color: #065f46; }
+.status-noshow { background: #fee2e2; color: #991b1b; }
+.status-cancelled { background: #e5e7eb; color: #374151; }
+.icon-btn { width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.icon-btn.success { background: #d1fae5; color: var(--success); }
+.icon-btn.danger { background: #fee2e2; color: var(--danger); }
+.icon-btn.edit { background: #e0e7ff; color: var(--info); }
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 15px; }
+.modal.show { display: flex; }
+.modal-content { background: white; border-radius: 16px; padding: 20px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.modal-title { font-size: 18px; font-weight: 600; }
+.form-group { margin-bottom: 15px; }
+.form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; color: var(--text-light); }
+.form-input, .form-select, .form-textarea { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px; font-size: 15px; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); }
+.form-textarea { min-height: 80px; resize: vertical; }
+.tabs { display: flex; gap: 5px; margin-bottom: 15px; background: var(--bg); padding: 5px; border-radius: 10px; flex-wrap: wrap; }
+.tab { flex: 1; min-width: 80px; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px; }
+.tab.active { background: white; color: var(--primary); }
+.service-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.service-info { flex: 1; }
+.service-name { font-weight: 600; font-size: 16px; }.service-desc { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+.service-meta { display: flex; gap: 15px; margin-top: 8px; font-size: 13px; color: var(--text-light); flex-wrap: wrap; }
+.toggle-switch { position: relative; width: 50px; height: 28px; display: inline-block; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #ccc; border-radius: 28px; transition: 0.3s; }
+.toggle-slider:before { content: ""; position: absolute; height: 22px; width: 22px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+.toggle-switch input:checked + .toggle-slider { background: var(--success); }
+.toggle-switch input:checked + .toggle-slider:before { transform: translateX(22px); }
+.employee-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.employee-info { flex: 1; }
+.employee-name { font-weight: 600; font-size: 16px; }
+.employee-phone { font-size: 13px; color: var(--text-light); }
+.employee-role { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; background: #e0e7ff; color: var(--info); margin-top: 4px; }
+.employee-commission { font-weight: 600; color: var(--success); font-size: 14px; margin-top: 4px; }
+.inventory-item { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.stock-low { background: #fee2e2; border-color: var(--danger); }
+.stock-ok { background: #d1fae5; border-color: var(--success); }
+.note-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid var(--border); border-left: 4px solid var(--primary); }
+.note-card.debt { border-left-color: var(--danger); background: #fef2f2; }
+.note-card.urgent { border-left-color: var(--warning); }
+.note-type { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+.note-type.debt { background: var(--danger); color: white; }
+.note-type.urgent { background: var(--warning); color: white; }
+.note-type.reminder { background: var(--info); color: white; }
+.transaction-item { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.transaction-income { border-left: 4px solid var(--success); }
+.transaction-expense { border-left: 4px solid var(--danger); }
+.chart-container { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; }
+.chart-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; }
+.bar-chart { display: flex; align-items: flex-end; justify-content: space-around; height: 200px; padding: 10px 0; border-bottom: 2px solid var(--border); }
+.bar-group { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.bar { width: 25px; margin: 0 2px; border-radius: 4px 4px 0 0; }
+.bar.income { background: var(--success); }
+.bar.expense { background: var(--danger); }
+.bar-label { font-size: 11px; color: var(--text-light); margin-top: 5px; text-align: center; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-light); }
+.empty-state .icon { font-size: 48px; margin-bottom: 10px; opacity: 0.5; }
+.backup-section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; }
+.backup-btn { width: 100%; padding: 15px; border: 2px dashed var(--primary); border-radius: 12px; background: #f5f3ff; color: var(--primary); font-size: 15px; font-weight: 500; cursor: pointer; margin-bottom: 10px; }
+#fileInput { display: none; }
+.hidden { display: none !important; }
+.page { display: none; }
+.page.active { display: block; }
+.commission-box { padding: 15px; border-radius: 12px; text-align: center; }
+.commission-box.today { background: #e0e7ff; }
+.commission-box.month { background: #fef3c7; }
+.commission-box.total { background: #d1fae5; }
+.employee-checkbox { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg); border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
+.employee-checkbox input { width: 20px; height: 20px; cursor: pointer; }
+.employee-checkbox label { flex: 1; cursor: pointer; font-size: 14px; }.employee-checkbox .emp-role { font-size: 12px; color: var(--text-light); }
+.progress-bar { height: 25px; background: var(--bg); border-radius: 12px; overflow: hidden; margin-bottom: 10px; position: relative; }
+.progress-fill { height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600; transition: width 0.3s; }
+.legend-item { display: flex; align-items: center; gap: 8px; padding: 8px; font-size: 13px; }
+.legend-color { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; }
+.legend-value { margin-left: auto; font-weight: 600; }
+@media (max-width: 400px) {
+  .stat-card .value { font-size: 24px; }
+  .quick-actions { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2>Peluqueria Pro</h2>
+    <button class="close-btn" onclick="toggleSidebar()">X</button>
+  </div>
+  <div class="sidebar-menu">
+    <div class="menu-item active" data-page="dashboard" onclick="showPage('dashboard')"><span class="icon">📊</span> Dashboard</div>
+    <div class="menu-item" data-page="clients" onclick="showPage('clients')"><span class="icon">👥</span> Clientes</div>
+    <div class="menu-item" data-page="appointments" onclick="showPage('appointments')"><span class="icon">📅</span> Citas</div>
+    <div class="menu-item" data-page="services" onclick="showPage('services')"><span class="icon">✂️</span> Servicios</div>
+    <div class="menu-item" data-page="employees" onclick="showPage('employees')"><span class="icon">👤</span> Empleados</div>
+    <div class="menu-item" data-page="inventory" onclick="showPage('inventory')"><span class="icon"></span> Inventario<span class="badge" id="inventoryBadge" style="display:none">0</span></div>
+    <div class="menu-item" data-page="finance" onclick="showPage('finance')"><span class="icon">💰</span> Finanzas</div>
+    <div class="menu-item" data-page="notes" onclick="showPage('notes')"><span class="icon">📝</span> Notas</div>
+    <div class="menu-item" data-page="reports" onclick="showPage('reports')"><span class="icon"></span> Reportes</div>
+    <div class="menu-item" data-page="backup" onclick="showPage('backup')"><span class="icon">☁️</span> Respaldo</div>
+  </div>
+</div>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="header">
+  <button class="menu-btn" onclick="toggleSidebar()"></button>
+  <h1 id="pageTitle">Dashboard</h1>
+  <div>
+    <button class="header-btn" onclick="showNotifications()">🔔</button>
+    <button class="header-btn" onclick="showPage('backup')">️</button>
+  </div>
+</div>
+
+<div class="page active" id="page-dashboard">
+  <div class="container">
+    <div class="alert-banner hidden" id="stockAlert" onclick="showPage('inventory')">
+      <span class="icon">⚠️</span><span class="text" id="stockAlertText">Productos con stock bajo</span><span>→</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card blue"><div class="value" id="statClients">0</div><div class="label">Clientes</div><div class="icon-big">👥</div></div>      <div class="stat-card purple"><div class="value" id="statTodayAppts">0</div><div class="label">Citas Hoy</div><div class="icon-big">📅</div></div>
+      <div class="stat-card green"><div class="value" id="statMonthIncome">CUP 0</div><div class="label">Ingresos Mes</div><div class="icon-big">📈</div></div>
+      <div class="stat-card orange"><div class="value" id="statServices">0</div><div class="label">Servicios</div><div class="icon-big">✂️</div></div>
+      <div class="stat-card pink"><div class="value" id="statEmployees">0</div><div class="label">Empleados</div><div class="icon-big">👤</div></div>
+      <div class="stat-card teal"><div class="value" id="statBalance">CUP 0</div><div class="label">Balance</div><div class="icon-big">💵</div></div>
+    </div>
+    <div class="quick-actions">
+      <button class="action-btn primary" onclick="openNewAppointment()"> Nueva Cita</button>
+      <button class="action-btn" onclick="openNewClient()"> Nuevo Cliente</button>
+      <button class="action-btn" onclick="openNewTransaction('income')">💰 Registrar Pago</button>
+      <button class="action-btn" onclick="openNewNote()"> Nueva Nota</button>
+    </div>
+    <div class="section-card">
+      <div class="section-title">📅 Próximas Citas</div>
+      <div id="upcomingAppointments"></div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">📈 Resumen Financiero del Mes</div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span>Ingresos</span><span style="color:var(--success);font-weight:600" id="dashIncome">CUP 0</span></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span>Gastos</span><span style="color:var(--danger);font-weight:600" id="dashExpenses">CUP 0</span></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0"><span style="font-weight:600">Balance</span><span style="color:var(--success);font-weight:600" id="dashBalance">CUP 0</span></div>
+    </div>
+    <div class="section-card" onclick="showPage('notes')" style="cursor:pointer">
+      <div class="section-title">💰 Deudas Pendientes</div>
+      <div style="text-align:center;padding:20px">
+        <div style="font-size:36px;font-weight:700;color:var(--danger)" id="dashDebts">CUP 0</div>
+        <div style="color:var(--text-light);margin-top:5px" id="dashDebtCount">0 clientes con deuda</div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-title"> Inventario</div>
+      <div style="text-align:center;padding:20px">
+        <div style="font-size:36px;font-weight:700;color:var(--warning)" id="dashLowStock">0</div>
+        <div style="color:var(--text-light)">productos con stock bajo</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-clients">
+  <div class="container">
+    <input type="text" class="search-box" id="clientSearch" placeholder="🔍 Buscar por nombre, teléfono o email..." oninput="renderClients()">
+    <button class="btn btn-primary btn-full" style="margin-bottom:15px" onclick="openNewClient()">+ Nueva Clienta</button>
+    <div class="stats-grid">
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--primary)" id="totalClients">0</div><div style="color:var(--text-light)">Total Clientas</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--info)" id="newClientsMonth">0</div><div style="color:var(--text-light)">Nuevas este mes</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--danger)" id="totalNoShows">0</div><div style="color:var(--text-light)">No-Show Registrados</div></div>
+    </div>
+    <div style="display:flex;gap:10px;margin:15px 0;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="sortClients('name')">↕ Por Nombre (A-Z)</button>      <button class="btn btn-outline" onclick="sortClients('date')"> Por Fecha</button>
+    </div>
+    <div class="section-card">
+      <div class="section-title">Lista de Clientas (<span id="clientListCount">0</span>)</div>
+      <div class="client-list" id="clientList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-appointments">
+  <div class="container">
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:15px;flex-wrap:wrap">
+      <span style="font-size:24px"></span>
+      <input type="date" class="form-input" id="apptDateFilter" onchange="renderAppointments()" style="flex:1;min-width:150px">
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-bottom:15px" onclick="openNewAppointment()">+ Nueva Cita</button>
+    <div class="stats-grid">
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--primary)" id="apptDayTotal">0</div><div style="color:var(--text-light)">Citas del día</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--success)" id="apptDayCompleted">0</div><div style="color:var(--text-light)">Completadas</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--warning)" id="apptDayPending">0</div><div style="color:var(--text-light)">Pendientes</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:24px;font-weight:700;color:var(--info)" id="apptDayIncome">CUP 0</div><div style="color:var(--text-light)">Ingresos del día</div></div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">📅 Citas del <span id="apptDateLabel">hoy</span></div>
+      <div id="appointmentList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-services">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap">
+      <div><h2>Servicios</h2><p style="color:var(--text-light);font-size:14px">Gestiona los servicios de tu peluquería</p></div>
+      <button class="btn btn-primary" onclick="openNewService()">+ Nuevo</button>
+    </div>
+    <div class="stats-grid">
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--primary)" id="totalServices">0</div><div style="color:var(--text-light)">Total Servicios</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--success)" id="activeServices">0</div><div style="color:var(--text-light)">Activos</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:24px;font-weight:700;color:var(--info)" id="avgPrice">CUP 0</div><div style="color:var(--text-light)">Precio Promedio</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:24px;font-weight:700;color:var(--warning)" id="avgDuration">0 min</div><div style="color:var(--text-light)">Duración Promedio</div></div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">✂️ Servicios Activos</div>
+      <div id="serviceList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-employees">
+  <div class="container">    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap">
+      <div><h2>Empleados</h2><p style="color:var(--text-light);font-size:14px">Gestión de personal y comisiones por clienta</p></div>
+      <button class="btn btn-primary" onclick="openNewEmployee()">+ Nuevo</button>
+    </div>
+    <div class="stats-grid">
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700" id="totalEmployees">0</div><div style="color:var(--text-light)">Total Empleados</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--success)" id="activeEmployees">0</div><div style="color:var(--text-light)">Activos</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--info)" id="hairdressers">0</div><div style="color:var(--text-light)">Peluqueras</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--warning)" id="regularEmployees">0</div><div style="color:var(--text-light)">Empleados</div></div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" id="tabEmpList" onclick="switchEmployeeTab('list')">Lista de Empleados</div>
+      <div class="tab" id="tabEmpCom" onclick="switchEmployeeTab('commissions')">Comisiones del Mes</div>
+    </div>
+    <div id="employeeListTab">
+      <div class="section-card">
+        <div class="section-title">Empleados</div>
+        <div id="employeeList"></div>
+      </div>
+    </div>
+    <div id="employeeCommissionsTab" style="display:none">
+      <div class="section-card">
+        <div class="section-title">💰 Comisiones por Empleado</div>
+        <div style="background:#f0f9ff;padding:12px;border-radius:10px;margin-bottom:15px;font-size:13px;color:var(--text-light)">
+          <strong>💡 Cómo funciona:</strong><br>
+          • Peluquera: 100 CUP por cada clienta atendida<br>
+          • Empleado: 80 CUP por cada clienta atendida<br>
+          • Para que se calcule, asigna un empleado al crear/editar la cita
+        </div>
+        <div id="commissionsList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-inventory">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap">
+      <div><h2>Inventario</h2><p style="color:var(--text-light);font-size:14px">Control de productos y stock</p></div>
+      <button class="btn btn-primary" onclick="openNewProduct()">+ Nuevo</button>
+    </div>
+    <div class="stats-grid">
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700" id="totalProducts">0</div><div style="color:var(--text-light)">Total Productos</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--danger)" id="lowStockProducts">0</div><div style="color:var(--text-light)">Bajo Stock</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:24px;font-weight:700;color:var(--success)" id="inventoryValue">CUP 0</div><div style="color:var(--text-light)">Valor Inventario</div></div>
+    </div>
+    <div class="section-card" style="background:#fef2f2;border:1px solid var(--danger)">
+      <div class="section-title" style="color:var(--danger)">⚠️ Alertas de Stock Bajo</div>
+      <div id="lowStockList"></div>
+    </div>    <div class="section-card">
+      <div class="section-title">📦 Todos los Productos</div>
+      <div id="productList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-finance">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap">
+      <div><h2>Finanzas</h2><p style="color:var(--text-light);font-size:14px">Control de ingresos y gastos</p></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap">
+      <button class="btn btn-success" style="flex:1;min-width:120px" onclick="openNewTransaction('income')">📈 Ingreso</button>
+      <button class="btn btn-danger" style="flex:1;min-width:120px" onclick="openNewTransaction('expense')">📉 Gasto</button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:15px;flex-wrap:wrap">
+      <span style="font-size:24px">📅</span>
+      <input type="month" class="form-input" id="financeMonth" onchange="renderFinance()" style="flex:1;min-width:150px">
+    </div>
+    <div class="stat-card green" style="margin-bottom:12px"><div class="label">Ingresos del Mes</div><div class="value" id="finIncome">CUP 0</div><div class="icon-big">📈</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#ef4444,#dc2626);margin-bottom:12px"><div class="label">Gastos del Mes</div><div class="value" id="finExpenses">CUP 0</div><div class="icon-big">📉</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#3b82f6,#2563eb);margin-bottom:15px"><div class="label">Balance del Mes</div><div class="value" id="finBalance">CUP 0</div><div class="icon-big">💵</div></div>
+    <div class="tabs">
+      <div class="tab active" id="tabTransAll" onclick="filterTransactions('all')">Todos</div>
+      <div class="tab" id="tabTransInc" onclick="filterTransactions('income')">Ingresos</div>
+      <div class="tab" id="tabTransExp" onclick="filterTransactions('expense')">Gastos</div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">Todas las Transacciones</div>
+      <div id="transactionList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-notes">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap">
+      <div><h2>Notas y Avisos</h2><p style="color:var(--text-light);font-size:14px">Gestión de deudas, recordatorios y avisos</p></div>
+      <button class="btn btn-primary" onclick="openNewNote()">+ Nueva</button>
+    </div>
+    <div class="stats-grid">
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--primary)" id="pendingNotes">0</div><div style="color:var(--text-light)">Pendientes</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--danger)" id="debtNotes">0</div><div style="color:var(--text-light)">Deudas</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:32px;font-weight:700;color:var(--warning)" id="urgentNotes">0</div><div style="color:var(--text-light)">Urgentes</div></div>
+      <div class="section-card" style="margin:0"><div style="font-size:24px;font-weight:700;color:var(--success)" id="totalDebtAmount">CUP 0</div><div style="color:var(--text-light)">Total Deudas</div></div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" id="tabNoteAll" onclick="filterNotes('all')">Todas</div>
+      <div class="tab" id="tabNoteDebt" onclick="filterNotes('debt')">Deudas</div>      <div class="tab" id="tabNoteUrg" onclick="filterNotes('urgent')">Urgentes</div>
+      <div class="tab" id="tabNoteRec" onclick="filterNotes('reminder')">Rec.</div>
+    </div>
+    <input type="text" class="search-box" id="noteSearch" placeholder="🔍 Buscar notas..." oninput="renderNotes()">
+    <div id="noteList"></div>
+  </div>
+</div>
+
+<div class="page" id="page-reports">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap">
+      <div><h2>Reportes</h2><p style="color:var(--text-light);font-size:14px">Análisis y estadísticas del negocio</p></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap">
+      <button class="btn btn-outline" style="flex:1;min-width:120px" onclick="exportReport()">📥 Exportar</button>
+      <button class="btn btn-outline" style="flex:1;min-width:120px" onclick="exportBackup()">💾 Backup</button>
+    </div>
+    <div class="section-card">
+      <div class="form-group"><label class="form-label">Fecha Inicio</label><input type="date" class="form-input" id="reportStartDate" onchange="renderReports()"></div>
+      <div class="form-group"><label class="form-label">Fecha Fin</label><input type="date" class="form-input" id="reportEndDate" onchange="renderReports()"></div>
+    </div>
+    <div class="section-card">
+      <div class="section-title"> Estadísticas de Citas</div>
+      <div class="stats-grid">
+        <div class="stat-card purple"><div class="value" id="repTotalAppts">0</div><div class="label">Total Citas</div></div>
+        <div class="stat-card green"><div class="value" id="repCompletedAppts">0</div><div class="label">Completadas</div></div>
+        <div class="stat-card red"><div class="value" id="repCancelledAppts">0</div><div class="label">Canceladas</div></div>
+        <div class="stat-card orange"><div class="value" id="repNoShowAppts">0</div><div class="label">No-Show</div></div>
+      </div>
+      <div class="chart-container">
+        <div class="chart-title">Distribución de Estados de Citas</div>
+        <div id="apptStatusChart"></div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">💰 Resumen Financiero</div>
+      <div class="stats-grid">
+        <div class="stat-card green"><div class="value" id="repIncome">CUP 0</div><div class="label">Ingresos</div></div>
+        <div class="stat-card red"><div class="value" id="repExpenses">CUP 0</div><div class="label">Gastos</div></div>
+        <div class="stat-card blue"><div class="value" id="repBalance">CUP 0</div><div class="label">Balance</div></div>
+        <div class="stat-card purple"><div class="value" id="repAvgPerAppt">CUP 0</div><div class="label">Promedio/Cita</div></div>
+      </div>
+      <div class="chart-container">
+        <div class="chart-title">Ingresos vs Gastos (últimos 7 días)</div>
+        <div class="bar-chart" id="barChart"></div>
+      </div>
+      <div class="chart-container">
+        <div class="chart-title">Ingresos por Categoría</div>
+        <div id="incomeCategoryChart"></div>
+      </div>      <div class="chart-container">
+        <div class="chart-title">Gastos por Categoría</div>
+        <div id="expenseCategoryChart"></div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">✂️ Servicios Más Populares</div>
+      <div class="stats-grid">
+        <div class="stat-card orange"><div class="value" id="repTotalServices">0</div><div class="label">Total Servicios</div></div>
+        <div class="stat-card green"><div class="value" id="repNewClients">0</div><div class="label">Nuevos Clientes</div></div>
+      </div>
+      <div class="chart-container">
+        <div class="chart-title">Servicios por Cantidad Realizados</div>
+        <div id="serviceQuantityChart"></div>
+      </div>
+      <div class="chart-container">
+        <div class="chart-title">Ingresos por Servicio</div>
+        <div id="serviceIncomeChart"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-backup">
+  <div class="container">
+    <h2 style="margin-bottom:15px">☁️ Respaldo y Restauración</h2>
+    <div class="backup-section">
+      <h3 style="margin-bottom:10px">📁 Cargar Respaldo</h3>
+      <p style="color:var(--text-light);font-size:14px;margin-bottom:15px">Sube tu archivo JSON de respaldo para recuperar todos tus datos</p>
+      <button class="backup-btn" onclick="document.getElementById('fileInput').click()">📂 Seleccionar archivo de respaldo</button>
+      <input type="file" id="fileInput" accept=".json" onchange="importBackup(event)">
+    </div>
+    <div class="backup-section">
+      <h3 style="margin-bottom:10px">💾 Crear Respaldo</h3>
+      <p style="color:var(--text-light);font-size:14px;margin-bottom:15px">Descarga un archivo con todos tus datos actuales</p>
+      <button class="backup-btn" onclick="exportBackup()">💾 Descargar Backup Completo</button>
+    </div>
+    <div class="backup-section">
+      <h3 style="margin-bottom:10px">⚠️ Zona Peligrosa</h3>
+      <button class="btn btn-danger btn-full" onclick="clearAllData()">🗑️ Borrar todos los datos</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Título</div>
+      <button class="close-btn" onclick="closeModal()" style="color:var(--text)">X</button>
+    </div>    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+let data = { clients: [], services: [], appointments: [], employees: [], products: [], transactions: [], notes: [] };
+let currentSort = 'name';
+let currentNoteFilter = 'all';
+let currentTransactionFilter = 'all';
+let currentEmployeeTab = 'list';
+
+function normalizeTipo(tipo) {
+  if (!tipo) return '';
+  var t = tipo.toLowerCase().trim();
+  if (t === 'ingreso' || t === 'income') return 'income';
+  if (t === 'gasto' || t === 'expense') return 'expense';
+  if (t === 'deuda' || t === 'debt') return 'debt';
+  if (t === 'urgente' || t === 'urgent') return 'urgent';
+  if (t === 'recordatorio' || t === 'reminder') return 'reminder';
+  if (t === 'completada' || t === 'completed') return 'completada';
+  if (t === 'pendiente' || t === 'pending') return 'pendiente';
+  if (t === 'no_show' || t === 'no-show' || t === 'noshow') return 'no_show';
+  if (t === 'cancelada' || t === 'cancelled' || t === 'cancel') return 'cancelada';
+  return t;
+}
+
+function safeNumber(val) {
+  if (val === null || val === undefined || val === '') return 0;
+  var num = parseFloat(String(val).replace(/,/g, '.'));
+  return isNaN(num) ? 0 : num;
+}
+
+function init() {
+  loadData();
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('apptDateFilter').value = today;
+  document.getElementById('financeMonth').value = today.substring(0, 7);
+  const monthStart = today.substring(0, 8) + '01';
+  document.getElementById('reportStartDate').value = monthStart;
+  document.getElementById('reportEndDate').value = today;
+  renderAll();
+}
+
+function loadData() {
+  const saved = localStorage.getItem('peluqueriaPro');
+  if (saved) { try { data = JSON.parse(saved); } catch(e) {} }
+  if (!data.clients) data.clients = [];
+  if (!data.services) data.services = [];
+  if (!data.appointments) data.appointments = [];
+  if (!data.employees) data.employees = [];  if (!data.products) data.products = [];
+  if (!data.transactions) data.transactions = [];
+  if (!data.notes) data.notes = [];
+  data.transactions.forEach(function(t) { t.tipo = normalizeTipo(t.tipo); });
+  data.notes.forEach(function(n) { n.tipo = normalizeTipo(n.tipo); });
+  data.appointments.forEach(function(a) { a.estado = normalizeTipo(a.estado); });
+}
+
+function saveData() { localStorage.setItem('peluqueriaPro', JSON.stringify(data)); }
+function renderAll() { renderDashboard(); renderClients(); renderAppointments(); renderServices(); renderEmployees(); renderInventory(); renderFinance(); renderNotes(); renderReports(); }
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.menu-item').forEach(function(m) { m.classList.remove('active'); });
+  const active = document.querySelector('.menu-item[data-page="' + page + '"]');
+  if (active) active.classList.add('active');
+  const titles = { dashboard: 'Dashboard', clients: 'Clientes', appointments: 'Citas', services: 'Servicios', employees: 'Empleados', inventory: 'Inventario', finance: 'Finanzas', notes: 'Notas', reports: 'Reportes', backup: 'Respaldo' };
+  document.getElementById('pageTitle').textContent = titles[page] || 'Peluqueria Pro';
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+  renderAll();
+}
+
+function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
+function formatMoney(amount) { return 'CUP ' + Number(amount || 0).toLocaleString('es-CU'); }
+function formatDate(dateStr) { if (!dateStr) return ''; const d = new Date(dateStr + 'T00:00:00'); return d.toLocaleDateString('es-CU', { day: '2-digit', month: '2-digit', year: 'numeric' }); }
+function formatDateLong(dateStr) { if (!dateStr) return ''; const d = new Date(dateStr + 'T00:00:00'); return d.toLocaleDateString('es-CU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
+function getInitials(name) { if (!name) return '?'; return name.split(' ').filter(function(n) { return n; }).map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase(); }
+function getAvatarColor(name) { const colors = ['#7c3aed', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6']; let hash = 0; for (let i = 0; i < (name || '').length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash); return colors[Math.abs(hash) % colors.length]; }
+
+function openModal(title, body) { document.getElementById('modalTitle').textContent = title; document.getElementById('modalBody').innerHTML = body; document.getElementById('modal').classList.add('show'); }
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
+
+function showToast(msg, type) {
+  type = type || 'success';
+  const toast = document.createElement('div');
+  const bgColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--warning)';
+  toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:' + bgColor + ';color:white;padding:12px 20px;border-radius:10px;z-index:9999;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.2);max-width:90%;white-space:pre-line;';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 4000);
+}
+function renderDashboard() {
+  const today = new Date().toISOString().split('T')[0];
+  const thisMonth = today.substring(0, 7);
+  document.getElementById('statClients').textContent = data.clients.length;
+  document.getElementById('statTodayAppts').textContent = data.appointments.filter(function(a) { return a.fecha === today; }).length;
+  const monthIncome = data.transactions.filter(function(t) { return t.tipo === 'income' && t.fecha && t.fecha.startsWith(thisMonth); }).reduce(function(s, t) { return s + safeNumber(t.monto); }, 0);
+  const monthExpenses = data.transactions.filter(function(t) { return t.tipo === 'expense' && t.fecha && t.fecha.startsWith(thisMonth); }).reduce(function(s, t) { return s + safeNumber(t.monto); }, 0);
+  document.getElementById('statMonthIncome').textContent = formatMoney(monthIncome);
+  document.getElementById('statServices').textContent = data.services.filter(function(s) { return s.activo !== false; }).length;
+  document.getElementById('statEmployees').textContent = data.employees.length;
+  document.getElementById('statBalance').textContent = formatMoney(monthIncome - monthExpenses);
+  document.getElementById('dashIncome').textContent = formatMoney(monthIncome);
+  document.getElementById('dashExpenses').textContent = formatMoney(monthExpenses);
+  document.getElementById('dashBalance').textContent = formatMoney(monthIncome - monthExpenses);
+  const debts = data.notes.filter(function(n) { return normalizeTipo(n.tipo) === 'debt' && !n.pagada; });
+  const totalDebt = debts.reduce(function(s, n) { return s + safeNumber(n.monto); }, 0);
+  document.getElementById('dashDebts').textContent = formatMoney(totalDebt);
+  document.getElementById('dashDebtCount').textContent = debts.length + ' clientes con deuda';
+  const lowStock = data.products.filter(function(p) { return (p.stock || 0) <= (p.stockMinimo || 5); });
+  document.getElementById('dashLowStock').textContent = lowStock.length;
+  if (lowStock.length > 0) {
+    document.getElementById('stockAlert').classList.remove('hidden');
+    document.getElementById('stockAlertText').textContent = lowStock.length + ' productos con stock bajo';
+    document.getElementById('inventoryBadge').style.display = 'flex';
+    document.getElementById('inventoryBadge').textContent = lowStock.length;
+  } else {
+    document.getElementById('stockAlert').classList.add('hidden');
+    document.getElementById('inventoryBadge').style.display = 'none';
+  }
+  const upcoming = data.appointments.filter(function(a) { return a.fecha >= today && normalizeTipo(a.estado) === 'pendiente'; }).sort(function(a, b) { return (a.fecha + a.hora).localeCompare(b.fecha + b.hora); }).slice(0, 5);
+  const upHtml = upcoming.length === 0 ? '<div class="empty-state"><div class="icon"></div>No hay citas próximas</div>' : upcoming.map(function(a) {
+    return '<div class="client-item" onclick="editAppointment(\'' + a.id + '\')"><div class="client-avatar" style="background:' + getAvatarColor(a.clienteNombre || '') + '">' + getInitials(a.clienteNombre || '?') + '</div><div class="client-info"><div class="client-name">' + (a.clienteNombre || 'Sin nombre') + '</div><div class="client-phone">' + formatDate(a.fecha) + ' a las ' + a.hora + '</div></div><div style="font-weight:600;color:var(--primary)">' + formatMoney(a.precioTotal) + '</div></div>';
+  }).join('');
+  document.getElementById('upcomingAppointments').innerHTML = upHtml;
+}
+
+function renderClients() {
+  const search = (document.getElementById('clientSearch') ? document.getElementById('clientSearch').value : '').toLowerCase();
+  let filtered = data.clients.filter(function(c) {
+    return (c.nombre || '').toLowerCase().indexOf(search) !== -1 || (c.apellidos || '').toLowerCase().indexOf(search) !== -1 || (c.telefono || '').toLowerCase().indexOf(search) !== -1 || (c.email || '').toLowerCase().indexOf(search) !== -1;
+  });
+  if (currentSort === 'name') filtered.sort(function(a, b) { return ((a.nombre || '') + ' ' + (a.apellidos || '')).localeCompare((b.nombre || '') + ' ' + (b.apellidos || '')); });
+  else filtered.sort(function(a, b) { return (b.fechaRegistro || '').localeCompare(a.fechaRegistro || ''); });
+  const thisMonth = new Date().toISOString().substring(0, 7);
+  const newThisMonth = data.clients.filter(function(c) { return c.fechaRegistro && c.fechaRegistro.startsWith(thisMonth); }).length;
+  const noShows = data.appointments.filter(function(a) { return normalizeTipo(a.estado) === 'no_show'; }).length;
+  document.getElementById('totalClients').textContent = data.clients.length;
+  document.getElementById('newClientsMonth').textContent = newThisMonth;
+  document.getElementById('totalNoShows').textContent = noShows;
+  document.getElementById('clientListCount').textContent = filtered.length;  const html = filtered.length === 0 ? '<div class="empty-state"><div class="icon">👥</div>No hay clientas registradas</div>' : filtered.map(function(c) {
+    return '<div class="client-item" onclick="viewClient(\'' + c.id + '\')"><div class="client-avatar" style="background:' + getAvatarColor(c.nombre || '') + '">' + getInitials(c.nombre || '?') + '</div><div class="client-info"><div class="client-name">' + (c.nombre || '') + ' ' + (c.apellidos || '') + '</div><div class="client-phone">' + (c.telefono || 'Sin teléfono') + '</div></div></div>';
+  }).join('');
+  document.getElementById('clientList').innerHTML = html;
+}
+
+function sortClients(type) { currentSort = type; renderClients(); }
+
+function viewClient(id) {
+  const c = data.clients.find(function(x) { return x.id === id; });
+  if (!c) return;
+  const clientAppts = data.appointments.filter(function(a) { return a.clienteId === id; });
+  const completed = clientAppts.filter(function(a) { return normalizeTipo(a.estado) === 'completada'; }).length;
+  const noShows = clientAppts.filter(function(a) { return normalizeTipo(a.estado) === 'no_show'; });
+  const body = '<div style="text-align:center;margin-bottom:15px"><div class="client-avatar" style="width:80px;height:80px;font-size:32px;margin:0 auto;background:' + getAvatarColor(c.nombre || '') + '">' + getInitials(c.nombre || '?') + '</div><h3 style="margin-top:10px">' + (c.nombre || '') + ' ' + (c.apellidos || '') + '</h3><p style="color:var(--text-light)">📱 ' + (c.telefono || 'Sin teléfono') + '</p>' +
+    (c.email ? '<p style="color:var(--text-light)">✉️ ' + c.email + '</p>' : '') +
+    (c.direccion ? '<p style="color:var(--text-light)">📍 ' + c.direccion + '</p>' : '') +
+    (c.notas ? '<p style="color:var(--text-light);margin-top:10px;background:var(--bg);padding:10px;border-radius:8px">📝 ' + c.notas + '</p>' : '') +
+    (c.alergias ? '<p style="color:var(--danger);margin-top:10px;background:#fef2f2;padding:10px;border-radius:8px">⚠️ Alergias: ' + c.alergias + '</p>' : '') + '</div>' +
+    '<div class="stats-grid"><div class="section-card" style="margin:0;text-align:center"><div style="font-size:24px;font-weight:700;color:var(--success)">' + completed + '</div><div style="font-size:12px;color:var(--text-light)">Citas completadas</div></div><div class="section-card" style="margin:0;text-align:center"><div style="font-size:24px;font-weight:700;color:var(--danger)">' + noShows.length + '</div><div style="font-size:12px;color:var(--text-light)">No-Shows</div></div></div>' +
+    (noShows.length > 0 ? '<div style="background:#fef2f2;border:1px solid var(--danger);border-radius:10px;padding:12px;margin-top:10px"><div style="font-weight:600;color:var(--danger);margin-bottom:8px">⚠️ Historial de No-Shows</div>' + noShows.map(function(n) { return '<div style="font-size:13px;color:var(--text-light)">• ' + formatDate(n.fecha) + ' a las ' + n.hora + '</div>'; }).join('') + '</div>' : '') +
+    '<div style="display:flex;gap:10px;margin-top:15px"><button class="btn btn-primary" style="flex:1" onclick="editClient(\'' + c.id + '\')">✏️ Editar</button><button class="btn btn-outline" style="flex:1" onclick="openNewAppointmentForClient(\'' + c.id + '\')">📅 Nueva Cita</button></div><button class="btn btn-danger btn-full" style="margin-top:10px" onclick="deleteClient(\'' + c.id + '\')">️ Eliminar</button>';
+  openModal('Detalle de Clienta', body);
+}
+
+function openNewClient() {
+  const body = '<div class="form-group"><label class="form-label">Nombre *</label><input type="text" class="form-input" id="clientName" placeholder="Nombre"></div><div class="form-group"><label class="form-label">Apellidos</label><input type="text" class="form-input" id="clientLastName" placeholder="Apellidos"></div><div class="form-group"><label class="form-label">Teléfono</label><input type="tel" class="form-input" id="clientPhone" placeholder="Teléfono"></div><div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="clientEmail" placeholder="Email"></div><div class="form-group"><label class="form-label">Dirección</label><input type="text" class="form-input" id="clientAddress" placeholder="Dirección"></div><div class="form-group"><label class="form-label">Notas</label><textarea class="form-textarea" id="clientNotes" placeholder="Notas adicionales"></textarea></div><div class="form-group"><label class="form-label">Alergias</label><input type="text" class="form-input" id="clientAllergies" placeholder="Alergias conocidas"></div><button class="btn btn-primary btn-full" onclick="saveClient()">💾 Guardar Clienta</button>';
+  openModal('Nueva Clienta', body);
+}
+
+function saveClient() {
+  const name = document.getElementById('clientName').value.trim();
+  if (!name) { showToast('El nombre es obligatorio', 'error'); return; }
+  const client = { id: generateId(), nombre: name, apellidos: document.getElementById('clientLastName').value.trim(), telefono: document.getElementById('clientPhone').value.trim(), email: document.getElementById('clientEmail').value.trim(), direccion: document.getElementById('clientAddress').value.trim(), notas: document.getElementById('clientNotes').value.trim(), alergias: document.getElementById('clientAllergies').value.trim(), fechaRegistro: new Date().toISOString().split('T')[0] };
+  data.clients.push(client); saveData(); closeModal(); renderAll(); showToast('Clienta registrada correctamente');
+}
+
+function editClient(id) {
+  const c = data.clients.find(function(x) { return x.id === id; });
+  if (!c) return;
+  const body = '<div class="form-group"><label class="form-label">Nombre *</label><input type="text" class="form-input" id="editClientName" value="' + (c.nombre || '') + '"></div><div class="form-group"><label class="form-label">Apellidos</label><input type="text" class="form-input" id="editClientLastName" value="' + (c.apellidos || '') + '"></div><div class="form-group"><label class="form-label">Teléfono</label><input type="tel" class="form-input" id="editClientPhone" value="' + (c.telefono || '') + '"></div><div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="editClientEmail" value="' + (c.email || '') + '"></div><div class="form-group"><label class="form-label">Dirección</label><input type="text" class="form-input" id="editClientAddress" value="' + (c.direccion || '') + '"></div><div class="form-group"><label class="form-label">Notas</label><textarea class="form-textarea" id="editClientNotes">' + (c.notas || '') + '</textarea></div><div class="form-group"><label class="form-label">Alergias</label><input type="text" class="form-input" id="editClientAllergies" value="' + (c.alergias || '') + '"></div><button class="btn btn-primary btn-full" onclick="updateClient(\'' + id + '\')"> Actualizar</button>';
+  openModal('Editar Clienta', body);
+}
+
+function updateClient(id) {
+  const c = data.clients.find(function(x) { return x.id === id; });
+  if (!c) return;
+  c.nombre = document.getElementById('editClientName').value.trim();
+  c.apellidos = document.getElementById('editClientLastName').value.trim();
+  c.telefono = document.getElementById('editClientPhone').value.trim();  c.email = document.getElementById('editClientEmail').value.trim();
+  c.direccion = document.getElementById('editClientAddress').value.trim();
+  c.notas = document.getElementById('editClientNotes').value.trim();
+  c.alergias = document.getElementById('editClientAllergies').value.trim();
+  saveData(); closeModal(); renderAll(); showToast('Clienta actualizada');
+}
+
+function deleteClient(id) {
+  if (!confirm('¿Eliminar esta clienta? Se perderán sus citas asociadas.')) return;
+  data.clients = data.clients.filter(function(c) { return c.id !== id; });
+  data.appointments = data.appointments.filter(function(a) { return a.clienteId !== id; });
+  saveData(); closeModal(); renderAll(); showToast('Clienta eliminada');
+}
+
+function renderAppointments() {
+  const date = document.getElementById('apptDateFilter').value;
+  const dayAppts = data.appointments.filter(function(a) { return a.fecha === date; });
+  const completed = dayAppts.filter(function(a) { return normalizeTipo(a.estado) === 'completada'; }).length;
+  const pending = dayAppts.filter(function(a) { return normalizeTipo(a.estado) === 'pendiente'; }).length;
+  const income = dayAppts.filter(function(a) { return normalizeTipo(a.estado) === 'completada'; }).reduce(function(s, a) { return s + safeNumber(a.precioTotal); }, 0);
+  document.getElementById('apptDayTotal').textContent = dayAppts.length;
+  document.getElementById('apptDayCompleted').textContent = completed;
+  document.getElementById('apptDayPending').textContent = pending;
+  document.getElementById('apptDayIncome').textContent = formatMoney(income);
+  document.getElementById('apptDateLabel').textContent = formatDateLong(date);
+  const sorted = dayAppts.slice().sort(function(a, b) { return (a.hora || '').localeCompare(b.hora || ''); });
+  const html = sorted.length === 0 ? '<div class="empty-state"><div class="icon">📅</div>No hay citas para este día</div>' : sorted.map(function(a) {
+    const estado = normalizeTipo(a.estado);
+    const statusClass = estado === 'completada' ? 'status-completed' : estado === 'no_show' ? 'status-noshow' : estado === 'cancelada' ? 'status-cancelled' : 'status-pending';
+    const statusText = estado === 'completada' ? 'Completada' : estado === 'no_show' ? 'No-Show' : estado === 'cancelada' ? 'Cancelada' : 'Pendiente';
+    const serviceNames = (a.servicios || []).map(function(sId) { const s = data.services.find(function(x) { return x.id === sId; }); return s ? s.nombre : 'Servicio'; }).join(', ');
+    const empleadosIds = a.empleadosIds || (a.empleadoId ? [a.empleadoId] : []);
+    const empNames = empleadosIds.map(function(eId) { const e = data.employees.find(function(x) { return x.id === eId; }); return e ? e.nombre : ''; }).filter(function(n) { return n; }).join(', ');
+    const empDisplay = empNames ? '<div style="font-size:12px;color:var(--info);margin-top:4px">👤 ' + empNames + '</div>' : '';
+    return '<div class="appointment-card"><div class="appt-header"><div><div class="appt-time">' + (a.hora || '--:--') + '</div><div class="appt-duration">' + (a.duracionTotal || 30) + ' min</div></div><div style="flex:1;margin-left:15px"><div class="appt-client">' + (a.clienteNombre || 'Sin nombre') + '</div><div class="appt-service">' + serviceNames + '</div>' + empDisplay + '<div class="appt-price">' + formatMoney(a.precioTotal) + '</div></div></div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="status-badge ' + statusClass + '">' + statusText + '</span>' +
+      (estado === 'pendiente' ? '<button class="icon-btn success" onclick="completeAppointment(\'' + a.id + '\')" title="Completar">✓</button><button class="icon-btn danger" onclick="markNoShow(\'' + a.id + '\')" title="No-Show">✕</button><button class="icon-btn" style="background:#e5e7eb;color:#6b7280" onclick="cancelAppointment(\'' + a.id + '\')" title="Cancelar">🚫</button>' : '') +
+      (estado !== 'pendiente' ? '<button class="icon-btn" style="background:#fef3c7;color:#92400e" onclick="reactivateAppointment(\'' + a.id + '\')" title="Reactivar como pendiente">↩️</button>' : '') +
+      '<button class="icon-btn edit" onclick="editAppointment(\'' + a.id + '\')" title="Editar">✎</button><button class="icon-btn danger" onclick="deleteAppointment(\'' + a.id + '\')" title="Eliminar">🗑</button></div>' +
+      (a.notas ? '<div style="margin-top:10px;padding:8px;background:var(--bg);border-radius:6px;font-size:13px">📝 ' + a.notas + '</div>' : '') + '</div>';
+  }).join('');
+  document.getElementById('appointmentList').innerHTML = html;
+}
+
+function openNewAppointment() { openNewAppointmentForClient(null); }
+
+function openNewAppointmentForClient(clientId) {
+  const sortedClients = data.clients.slice().sort(function(a, b) { return ((a.nombre || '') + ' ' + (a.apellidos || '')).localeCompare((b.nombre || '') + ' ' + (b.apellidos || '')); });
+  const activeServices = data.services.filter(function(s) { return s.activo !== false; });
+  const activeEmployees = data.employees.filter(function(e) { return e.activo !== false; });
+  const date = document.getElementById('apptDateFilter').value || new Date().toISOString().split('T')[0];  const clientOptions = sortedClients.map(function(c) { return '<option value="' + c.id + '"' + (c.id === clientId ? ' selected' : '') + '>' + (c.nombre || '') + ' ' + (c.apellidos || '') + (c.telefono ? ' - ' + c.telefono : '') + '</option>'; }).join('');
+  const employeeCheckboxes = activeEmployees.map(function(e) {
+    return '<div class="employee-checkbox"><input type="checkbox" class="apptEmployee" value="' + e.id + '" id="emp_' + e.id + '"><label for="emp_' + e.id + '"><strong>' + e.nombre + ' ' + (e.apellidos || '') + '</strong><br><span class="emp-role">' + (e.rol === 'peluquera' ? 'Peluquera' : 'Empleado') + ' • ' + (e.rol === 'peluquera' ? '100 CUP' : '80 CUP') + '/clienta</span></label></div>';
+  }).join('');
+  const body = '<div class="form-group"><label class="form-label">Clienta * (ordenada A-Z)</label><input type="text" class="form-input" id="apptClientSearch" placeholder="🔍 Buscar clienta..." oninput="filterClientSelect()" style="margin-bottom:8px"><select class="form-select" id="apptClient" size="6" style="height:180px">' + clientOptions + '</select></div>' +
+    '<div class="form-group"><label class="form-label">Servicios *</label><div style="max-height:150px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:10px">' +
+    activeServices.map(function(s) { return '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer"><input type="checkbox" class="apptService" value="' + s.id + '" data-price="' + s.precio + '" data-duration="' + s.duracionMinutos + '" onchange="calcApptTotal()"><span>' + s.nombre + '</span><span style="margin-left:auto;color:var(--text-light);font-size:13px">' + formatMoney(s.precio) + '</span></label>'; }).join('') + '</div></div>' +
+    '<div class="form-group"><label class="form-label">Empleados que atienden (selección múltiple)</label><div style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:10px">' + (activeEmployees.length === 0 ? '<p style="color:var(--text-light);font-size:13px">No hay empleados registrados</p>' : employeeCheckboxes) + '</div><div style="font-size:12px;color:var(--text-light);margin-top:5px">💡 Puedes seleccionar varios empleados para esta cita</div></div>' +
+    '<div class="form-group"><label class="form-label">Fecha *</label><input type="date" class="form-input" id="apptDate" value="' + date + '"></div>' +
+    '<div class="form-group"><label class="form-label">Hora *</label><input type="time" class="form-input" id="apptTime" value="09:00"></div>' +
+    '<div class="form-group"><label class="form-label">Notas</label><textarea class="form-textarea" id="apptNotes" placeholder="Notas de la cita"></textarea></div>' +
+    '<div style="background:var(--bg);padding:12px;border-radius:8px;margin-bottom:15px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>Total:</span><strong id="apptTotalPreview" style="color:var(--primary);font-size:18px">CUP 0</strong></div><div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-light)"><span>Duración estimada:</span><span id="apptDurationPreview">0 min</span></div></div>' +
+    '<button class="btn btn-primary btn-full" onclick="saveAppointment()">💾 Guardar Cita</button>';
+  openModal('Nueva Cita', body);
+}
+
+function filterClientSelect() {
+  const search = document.getElementById('apptClientSearch').value.toLowerCase();
+  const options = document.querySelectorAll('#apptClient option');
+  for (let i = 0; i < options.length; i++) options[i].style.display = options[i].textContent.toLowerCase().indexOf(search) !== -1 ? '' : 'none';
+}
+
+function calcApptTotal() {
+  let total = 0, duration = 0;
+  const checkboxes = document.querySelectorAll('.apptService:checked');
+  for (let i = 0; i < checkboxes.length; i++) { total += Number(checkboxes[i].dataset.price); duration += Number(checkboxes[i].dataset.duration); }
+  document.getElementById('apptTotalPreview').textContent = formatMoney(total);
+  document.getElementById('apptDurationPreview').textContent = duration + ' min';
+}
+
+function saveAppointment() {
+  const clientId = document.getElementById('apptClient').value;
+  const client = data.clients.find(function(c) { return c.id === clientId; });
+  if (!client) { showToast('Selecciona una clienta', 'error'); return; }
+  const noShowsPrevios = data.appointments.filter(function(a) { return a.clienteId === clientId && normalizeTipo(a.estado) === 'no_show'; });
+  if (noShowsPrevios.length > 0) {
+    const fechasNoShow = noShowsPrevios.map(function(n) { return formatDate(n.fecha); }).join(', ');
+    const continuar = confirm('️ ATENCIÓN: ' + client.nombre + ' ' + (client.apellidos || '') + ' tiene ' + noShowsPrevios.length + ' No-Show(s) previo(s) en:\n' + fechasNoShow + '\n\n¿Deseas continuar agendando la cita de todas formas?');
+    if (!continuar) return;
+  }
+  const services = [];
+  const checkboxes = document.querySelectorAll('.apptService:checked');
+  for (let i = 0; i < checkboxes.length; i++) services.push(checkboxes[i].value);
+  if (services.length === 0) { showToast('Selecciona al menos un servicio', 'error'); return; }
+  const date = document.getElementById('apptDate').value;
+  const time = document.getElementById('apptTime').value;
+  if (!date || !time) { showToast('Fecha y hora son obligatorios', 'error'); return; }
+  let total = 0, duration = 0;
+  for (let i = 0; i < checkboxes.length; i++) { total += Number(checkboxes[i].dataset.price); duration += Number(checkboxes[i].dataset.duration); }
+  const empleadosIds = [];  document.querySelectorAll('.apptEmployee:checked').forEach(function(cb) { empleadosIds.push(cb.value); });
+  const appt = { id: generateId(), clienteId: clientId, clienteNombre: client.nombre + ' ' + (client.apellidos || ''), servicios: services, fecha: date, hora: time, notas: document.getElementById('apptNotes').value.trim(), duracionTotal: duration, precioTotal: total, estado: 'pendiente', empleadosIds: empleadosIds };
+  data.appointments.push(appt); saveData(); closeModal(); renderAll();
+  const phone = client.telefono ? client.telefono.replace(/\D/g, '') : '';
+  const message = 'Gracias por contactar a peluqueria Cortes Maite. Hola ' + appt.clienteNombre + '! Te confirmamos tu cita: Fecha: ' + formatDate(appt.fecha) + ' a las ' + appt.hora + '. Direccion: Calle Angel Guerra #170. Esquina Camilo Cienfuegos. Si por alguna razon no puede asistir a esta cita, le agradeceriamos nos lo comunicara. Gracias!!!';
+  if (phone) {
+    setTimeout(function() {
+      if (confirm('✅ Cita guardada.\n\n¿Deseas enviar mensaje de confirmación a ' + appt.clienteNombre + '?')) {
+        const body = '<p style="margin-bottom:15px">¿Cómo deseas enviar el mensaje?</p><div style="background:var(--bg);padding:12px;border-radius:8px;margin-bottom:15px;font-size:13px;max-height:150px;overflow-y:auto">' + message + '</div><div style="display:flex;flex-direction:column;gap:10px"><button class="btn btn-success btn-full" onclick="window.open(\'https://wa.me/' + phone + '?text=' + encodeURIComponent(message) + '\', \'_blank\'); closeModal();">📲 WhatsApp</button><button class="btn btn-primary btn-full" onclick="window.open(\'sms:' + phone + '?body=' + encodeURIComponent(message) + '\', \'_blank\'); closeModal();">📱 SMS</button><button class="btn btn-outline btn-full" onclick="closeModal()">❌ No enviar</button></div>';
+        openModal('Enviar Confirmación', body);
+      }
+    }, 300);
+  } else {
+    showToast('Cita creada (clienta sin teléfono para mensaje)');
+  }
+}
+
+function editAppointment(id) {
+  const a = data.appointments.find(function(x) { return x.id === id; });
+  if (!a) return;
+  const sortedClients = data.clients.slice().sort(function(x, y) { return ((x.nombre || '') + ' ' + (x.apellidos || '')).localeCompare((y.nombre || '') + ' ' + (y.apellidos || '')); });
+  const activeServices = data.services.filter(function(s) { return s.activo !== false; });
+  const activeEmployees = data.employees.filter(function(e) { return e.activo !== false; });
+  const empleadosIds = a.empleadosIds || (a.empleadoId ? [a.empleadoId] : []);
+  const employeeCheckboxes = activeEmployees.map(function(e) {
+    const checked = empleadosIds.indexOf(e.id) !== -1 ? ' checked' : '';
+    return '<div class="employee-checkbox"><input type="checkbox" class="editApptEmployee" value="' + e.id + '" id="editEmp_' + e.id + '"' + checked + '><label for="editEmp_' + e.id + '"><strong>' + e.nombre + ' ' + (e.apellidos || '') + '</strong><br><span class="emp-role">' + (e.rol === 'peluquera' ? 'Peluquera' : 'Empleado') + ' • ' + (e.rol === 'peluquera' ? '100 CUP' : '80 CUP') + '/clienta</span></label></div>';
+  }).join('');
+  const body = '<div class="form-group"><label class="form-label">Clienta *</label><input type="text" class="form-input" id="editApptClientSearch" placeholder="🔍 Buscar..." oninput="filterEditClientSelect()" style="margin-bottom:8px"><select class="form-select" id="editApptClient" size="5" style="height:140px">' +
+    sortedClients.map(function(c) { return '<option value="' + c.id + '"' + (c.id === a.clienteId ? ' selected' : '') + '>' + (c.nombre || '') + ' ' + (c.apellidos || '') + '</option>'; }).join('') + '</select></div>' +
+    '<div class="form-group"><label class="form-label">Servicios</label><div style="max-height:150px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:10px">' +
+    activeServices.map(function(s) { return '<label style="display:flex;align-items:center;gap:8px;padding:6px 0"><input type="checkbox" class="editApptService" value="' + s.id + '" data-price="' + s.precio + '" data-duration="' + s.duracionMinutos + '"' + ((a.servicios || []).indexOf(s.id) !== -1 ? ' checked' : '') + ' onchange="calcEditApptTotal()"><span>' + s.nombre + '</span></label>'; }).join('') + '</div></div>' +
+    '<div class="form-group"><label class="form-label">Empleados que atienden (selección múltiple)</label><div style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:10px">' + (activeEmployees.length === 0 ? '<p style="color:var(--text-light);font-size:13px">No hay empleados registrados</p>' : employeeCheckboxes) + '</div></div>' +
+    '<div class="form-group"><label class="form-label">Fecha</label><input type="date" class="form-input" id="editApptDate" value="' + a.fecha + '"></div>' +
+    '<div class="form-group"><label class="form-label">Hora</label><input type="time" class="form-input" id="editApptTime" value="' + a.hora + '"></div>' +
+    '<div class="form-group"><label class="form-label">Notas</label><textarea class="form-textarea" id="editApptNotes">' + (a.notas || '') + '</textarea></div>' +
+    '<div style="background:var(--bg);padding:12px;border-radius:8px;margin-bottom:15px"><div style="display:flex;justify-content:space-between"><span>Total:</span><strong id="editApptTotalPreview" style="color:var(--primary)">' + formatMoney(a.precioTotal) + '</strong></div></div>' +
+    '<button class="btn btn-primary btn-full" onclick="updateAppointment(\'' + id + '\')">💾 Actualizar</button>';
+  openModal('Editar Cita', body);
+}
+
+function filterEditClientSelect() {
+  const search = document.getElementById('editApptClientSearch').value.toLowerCase();
+  const options = document.querySelectorAll('#editApptClient option');
+  for (let i = 0; i < options.length; i++) options[i].style.display = options[i].textContent.toLowerCase().indexOf(search) !== -1 ? '' : 'none';
+}
+
+function calcEditApptTotal() {
+  let total = 0;
+  const checkboxes = document.querySelectorAll('.editApptService:checked');  for (let i = 0; i < checkboxes.length; i++) total += Number(checkboxes[i].dataset.price);
+  document.getElementById('editApptTotalPreview').textContent = formatMoney(total);
+}
+
+function updateAppointment(id) {
+  const a = data.appointments.find(function(x) { return x.id === id; });
+  if (!a) return;
+  const clientId = document.getElementById('editApptClient').value;
+  const client = data.clients.find(function(c) { return c.id === clientId; });
+  a.clienteId = clientId;
+  a.clienteNombre = client ? client.nombre + ' ' + (client.apellidos || '') : '';
+  const services = [];
+  const checkboxes = document.querySelectorAll('.editApptService:checked');
+  for (let i = 0; i < checkboxes.length; i++) services.push(checkboxes[i].value);
+  a.servicios = services;
+  a.fecha = document.getElementById('editApptDate').value;
+  a.hora = document.getElementById('editApptTime').value;
+  a.notas = document.getElementById('editApptNotes').value.trim();
+  const empleadosIds = [];
+  document.querySelectorAll('.editApptEmployee:checked').forEach(function(cb) { empleadosIds.push(cb.value); });
+  a.empleadosIds = empleadosIds;
+  let total = 0, duration = 0;
+  for (let i = 0; i < checkboxes.length; i++) { total += Number(checkboxes[i].dataset.price); duration += Number(checkboxes[i].dataset.duration); }
+  a.precioTotal = total;
+  a.duracionTotal = duration;
+  saveData(); closeModal(); renderAll(); showToast('Cita actualizada');
+}
+
+function deleteAppointment(id) { if (!confirm('¿Eliminar esta cita?')) return; data.appointments = data.appointments.filter(function(a) { return a.id !== id; }); saveData(); renderAll(); showToast('Cita eliminada'); }
+function cancelAppointment(id) { if (!confirm('¿Cancelar esta cita?')) return; const a = data.appointments.find(function(x) { return x.id === id; }); if (!a) return; a.estado = 'cancelada'; saveData(); renderAll(); showToast('Cita cancelada'); }
+function reactivateAppointment(id) {
+  const a = data.appointments.find(function(x) { return x.id === id; });
+  if (!a) return;
+  const estadoAnterior = normalizeTipo(a.estado);
+  const estadoTexto = estadoAnterior === 'completada' ? 'completada' : estadoAnterior === 'no_show' ? 'No-Show' : 'cancelada';
+  if (!confirm('¿Reactivar esta cita de vuelta a Pendiente?\n(Estado actual: ' + estadoTexto + ')')) return;
+  a.estado = 'pendiente';
+  saveData(); renderAll();
+  showToast('Cita reactivada como Pendiente');
+}
+
+function completeAppointment(id) {
+  const a = data.appointments.find(function(x) { return x.id === id; });
+  if (!a) return;
+  const client = data.clients.find(function(c) { return c.id === a.clienteId; });
+  const phone = client ? (client.telefono || '') : '';
+  const cleanPhone = phone.replace(/\D/g, '');
+  const message = 'Gracias por contactar a peluqueria Cortes Maite. Hola ' + a.clienteNombre + '! Te confirmamos tu cita: Fecha: ' + formatDate(a.fecha) + ' a las ' + a.hora + '. Direccion: Calle Angel Guerra #170. Esquina Camilo Cienfuegos. Si por alguna razon no puede asistir a esta cita, le agradeceriamos nos lo comunicara. Gracias!!!';
+  const body = '<p style="margin-bottom:15px">¿Cómo deseas enviar el mensaje a <strong>' + a.clienteNombre + '</strong>?</p><div style="background:var(--bg);padding:12px;border-radius:8px;margin-bottom:15px;font-size:13px;max-height:150px;overflow-y:auto">' + message + '</div><div style="display:flex;flex-direction:column;gap:10px"><button class="btn btn-success btn-full" onclick="sendAndComplete(\'' + id + '\', \'whatsapp\', \'' + cleanPhone + '\')">📲 Enviar por WhatsApp</button><button class="btn btn-primary btn-full" onclick="sendAndComplete(\'' + id + '\', \'sms\', \'' + cleanPhone + '\')"> Enviar por SMS</button><button class="btn btn-outline btn-full" onclick="justComplete(\'' + id + '\')">✅ Completar sin enviar</button></div>';
+  openModal('Completar Cita', body);}
+
+function sendAndComplete(id, type, phone) {
+  const a = data.appointments.find(function(x) { return x.id === id; });
+  if (!a) return;
+  const client = data.clients.find(function(c) { return c.id === a.clienteId; });
+  const cleanPhone = client ? (client.telefono || '').replace(/\D/g, '') : '';
+  const message = 'Gracias por contactar a peluqueria Cortes Maite. Hola ' + a.clienteNombre + '! Te confirmamos tu cita: Fecha: ' + formatDate(a.fecha) + ' a las ' + a.hora + '. Direccion: Calle Angel Guerra #170. Esquina Camilo Cienfuegos. Si por alguna razon no puede asistir a esta cita, le agradeceriamos nos lo comunicara. Gracias!!!';
+  if (type === 'whatsapp' && cleanPhone) window.open('https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent(message), '_blank');
+  else if (type === 'sms' && cleanPhone) window.open('sms:' + cleanPhone + '?body=' + encodeURIComponent(message), '_blank');
+  justComplete(id);
+}
+
+function justComplete(id) {
+  const a = data.appointments.find(function(x) { return x.id === id; });
+  if (!a) return;
+  a.estado = 'completada';
+  data.transactions.push({ id: generateId(), tipo: 'income', monto: a.precioTotal, descripcion: 'Cita: ' + a.clienteNombre + ' - ' + (a.servicios || []).map(function(sId) { const s = data.services.find(function(x) { return x.id === sId; }); return s ? s.nombre : ''; }).join(', '), fecha: a.fecha, categoria: 'Servicios', clienteNombre: a.clienteNombre });
+  saveData(); closeModal(); renderAll(); showToast('Cita completada e ingreso registrado');
+}
+
+function markNoShow(id) {
+  if (!confirm('¿Marcar esta cita como No-Show?')) return;
+  const a = data.appointments.find(function(x) { return x.id === id; });
+  if (!a) return;
+  a.estado = 'no_show';
+  saveData(); renderAll();
+  const client = data.clients.find(function(c) { return c.id === a.clienteId; });
+  const phone = client && client.telefono ? client.telefono.replace(/\D/g, '') : '';
+  const message = 'Hola ' + a.clienteNombre + ', desde Cortes Maite registramos su inasistencia a la cita de hoy, sin que hayamos recibido comunicación del motivo. Este tipo de situaciones impactan negativamente en la gestión del Salón y en el tiempo de otras clientas. Debido a esto, sus futuras citas quedarán sujetas a una política de seña obligatoria. Esperamos contar con su compromiso en próximas ocasiones. Gracias.';
+  if (phone) {
+    setTimeout(function() {
+      const body = '<p style="margin-bottom:15px">Cita marcada como <strong>No-Show</strong>.<br><br>¿Deseas enviar aviso a <strong>' + a.clienteNombre + '</strong>?</p><div style="background:#fef2f2;padding:12px;border-radius:8px;margin-bottom:15px;font-size:13px;max-height:150px;overflow-y:auto;border:1px solid var(--danger)">' + message + '</div><div style="display:flex;flex-direction:column;gap:10px"><button class="btn btn-success btn-full" onclick="window.open(\'https://wa.me/' + phone + '?text=' + encodeURIComponent(message) + '\', \'_blank\'); closeModal();"> WhatsApp</button><button class="btn btn-primary btn-full" onclick="window.open(\'sms:' + phone + '?body=' + encodeURIComponent(message) + '\', \'_blank\'); closeModal();">📱 SMS</button><button class="btn btn-outline btn-full" onclick="closeModal()">❌ No enviar</button></div>';
+      openModal('Aviso de No-Show', body);
+    }, 300);
+  } else {
+    showToast('Cita marcada como No-Show (sin teléfono)');
+  }
+}
+
+function renderServices() {
+  const active = data.services.filter(function(s) { return s.activo !== false; });
+  const total = data.services.length;
+  const avgPrice = total > 0 ? data.services.reduce(function(s, x) { return s + safeNumber(x.precio); }, 0) / total : 0;
+  const avgDuration = total > 0 ? data.services.reduce(function(s, x) { return s + safeNumber(x.duracionMinutos); }, 0) / total : 0;
+  document.getElementById('totalServices').textContent = total;
+  document.getElementById('activeServices').textContent = active.length;
+  document.getElementById('avgPrice').textContent = formatMoney(Math.round(avgPrice));
+  document.getElementById('avgDuration').textContent = Math.round(avgDuration) + ' min';
+  const html = active.length === 0 ? '<div class="empty-state"><div class="icon">✂️</div>No hay servicios activos</div>' : active.map(function(s) {    const productsCount = (s.productosConsumidos || []).length;
+    return '<div class="service-card"><div class="service-info"><div class="service-name">' + s.nombre + '</div><div class="service-desc">' + (s.descripcion || '') + '</div><div class="service-meta"><span>💰 ' + formatMoney(s.precio) + '</span><span>⏱️ ' + s.duracionMinutos + ' min</span>' + (productsCount > 0 ? '<span>📦 ' + productsCount + ' producto(s)</span>' : '') + '</div></div><div style="display:flex;gap:8px;align-items:center"><label class="toggle-switch"><input type="checkbox"' + (s.activo !== false ? ' checked' : '') + ' onchange="toggleService(\'' + s.id + '\')"><span class="toggle-slider"></span></label><button class="icon-btn edit" onclick="editService(\'' + s.id + '\')">✎</button><button class="icon-btn danger" onclick="deleteService(\'' + s.id + '\')">🗑</button></div></div>';
+  }).join('');
+  document.getElementById('serviceList').innerHTML = html;
+}
+
+function openNewService() {
+  const body = '<div class="form-group"><label class="form-label">Nombre *</label><input type="text" class="form-input" id="serviceName" placeholder="Nombre del servicio"></div><div class="form-group"><label class="form-label">Descripción</label><textarea class="form-textarea" id="serviceDesc" placeholder="Descripción"></textarea></div><div class="form-group"><label class="form-label">Precio (CUP) *</label><input type="number" class="form-input" id="servicePrice" placeholder="0"></div><div class="form-group"><label class="form-label">Duración (minutos)</label><input type="number" class="form-input" id="serviceDuration" placeholder="30"></div><div class="form-group"><label class="form-label">Categoría</label><select class="form-select" id="serviceCategory"><option value="corte">Corte</option><option value="tinte">Tinte</option><option value="peinado">Peinado</option><option value="tratamiento">Tratamiento</option><option value="otro">Otro</option></select></div><button class="btn btn-primary btn-full" onclick="saveService()">💾 Guardar</button>';
+  openModal('Nuevo Servicio', body);
+}
+
+function saveService() {
+  const name = document.getElementById('serviceName').value.trim();
+  if (!name) { showToast('El nombre es obligatorio', 'error'); return; }
+  const service = { id: generateId(), nombre: name, descripcion: document.getElementById('serviceDesc').value.trim(), precio: Number(document.getElementById('servicePrice').value) || 0, duracionMinutos: Number(document.getElementById('serviceDuration').value) || 30, categoria: document.getElementById('serviceCategory').value, activo: true, comisionPorcentaje: 30, productosConsumidos: [] };
+  data.services.push(service); saveData(); closeModal(); renderAll(); showToast('Servicio creado');
+}
+
+function editService(id) {
+  const s = data.services.find(function(x) { return x.id === id; });
+  if (!s) return;
+  const body = '<div class="form-group"><label class="form-label">Nombre</label><input type="text" class="form-input" id="editServiceName" value="' + s.nombre + '"></div><div class="form-group"><label class="form-label">Descripción</label><textarea class="form-textarea" id="editServiceDesc">' + (s.descripcion || '') + '</textarea></div><div class="form-group"><label class="form-label">Precio (CUP)</label><input type="number" class="form-input" id="editServicePrice" value="' + s.precio + '"></div><div class="form-group"><label class="form-label">Duración (min)</label><input type="number" class="form-input" id="editServiceDuration" value="' + s.duracionMinutos + '"></div><div class="form-group"><label class="form-label">Categoría</label><select class="form-select" id="editServiceCategory"><option value="corte"' + (s.categoria === 'corte' ? ' selected' : '') + '>Corte</option><option value="tinte"' + (s.categoria === 'tinte' ? ' selected' : '') + '>Tinte</option><option value="peinado"' + (s.categoria === 'peinado' ? ' selected' : '') + '>Peinado</option><option value="tratamiento"' + (s.categoria === 'tratamiento' ? ' selected' : '') + '>Tratamiento</option><option value="otro"' + (s.categoria === 'otro' ? ' selected' : '') + '>Otro</option></select></div><button class="btn btn-primary btn-full" onclick="updateService(\'' + id + '\')">💾 Actualizar</button>';
+  openModal('Editar Servicio', body);
+}
+
+function updateService(id) {
+  const s = data.services.find(function(x) { return x.id === id; });
+  if (!s) return;
+  s.nombre = document.getElementById('editServiceName').value.trim();
+  s.descripcion = document.getElementById('editServiceDesc').value.trim();
+  s.precio = Number(document.getElementById('editServicePrice').value) || 0;
+  s.duracionMinutos = Number(document.getElementById('editServiceDuration').value) || 30;
+  s.categoria = document.getElementById('editServiceCategory').value;
+  saveData(); closeModal(); renderAll(); showToast('Servicio actualizado');
+}
+
+function toggleService(id) { const s = data.services.find(function(x) { return x.id === id; }); if (!s) return; s.activo = s.activo === false ? true : false; saveData(); renderAll(); }
+function deleteService(id) { if (!confirm('¿Eliminar este servicio?')) return; data.services = data.services.filter(function(s) { return s.id !== id; }); saveData(); renderAll(); showToast('Servicio eliminado'); }
+
+function renderEmployees() {
+  document.getElementById('totalEmployees').textContent = data.employees.length;
+  document.getElementById('activeEmployees').textContent = data.employees.filter(function(e) { return e.activo !== false; }).length;
+  document.getElementById('hairdressers').textContent = data.employees.filter(function(e) { return e.rol === 'peluquera'; }).length;
+  document.getElementById('regularEmployees').textContent = data.employees.filter(function(e) { return e.rol === 'empleado'; }).length;
+  if (currentEmployeeTab === 'list') {
+    const html = data.employees.length === 0 ? '<div class="empty-state"><div class="icon">👤</div>No hay empleados registrados</div>' : data.employees.map(function(e) {
+      const commissionText = e.rol === 'peluquera' ? 'CUP 100/clienta' : e.rol === 'empleado' ? 'CUP 80/clienta' : formatMoney(e.comision || 0);
+      return '<div class="employee-card"><div class="client-avatar" style="background:' + getAvatarColor(e.nombre || '') + '">' + getInitials(e.nombre || '?') + '</div><div class="employee-info"><div class="employee-name">' + (e.nombre || '') + ' ' + (e.apellidos || '') + '</div><div class="employee-phone">📱 ' + (e.telefono || 'Sin teléfono') + '</div><span class="employee-role">' + (e.rol === 'peluquera' ? 'Peluquera' : e.rol === 'empleado' ? 'Empleado' : 'Otro') + '</span><div class="employee-commission">' + commissionText + '</div></div><div style="display:flex;gap:5px"><label class="toggle-switch"><input type="checkbox"' + (e.activo !== false ? ' checked' : '') + ' onchange="toggleEmployee(\'' + e.id + '\')"><span class="toggle-slider"></span></label><button class="icon-btn edit" onclick="editEmployee(\'' + e.id + '\')">✎</button><button class="icon-btn danger" onclick="deleteEmployee(\'' + e.id + '\')">🗑</button></div></div>';
+    }).join('');
+    document.getElementById('employeeList').innerHTML = html;  } else { renderCommissions(); }
+}
+
+function renderCommissions() {
+  const today = new Date().toISOString().split('T')[0];
+  const thisMonth = today.substring(0, 7);
+  const allCompletedAppts = data.appointments.filter(function(a) { return normalizeTipo(a.estado) === 'completada'; });
+  const monthCompletedAppts = allCompletedAppts.filter(function(a) { return a.fecha && a.fecha.startsWith(thisMonth); });
+  const todayCompletedAppts = allCompletedAppts.filter(function(a) { return a.fecha === today; });
+  const html = data.employees.length === 0 ? '<div class="empty-state"><div class="icon">💰</div>No hay empleados registrados</div>' : data.employees.map(function(e) {
+    const todayCount = todayCompletedAppts.filter(function(a) { return (a.empleadosIds || []).indexOf(e.id) !== -1; }).length;
+    const monthCount = monthCompletedAppts.filter(function(a) { return (a.empleadosIds || []).indexOf(e.id) !== -1; }).length;
+    const totalCount = allCompletedAppts.filter(function(a) { return (a.empleadosIds || []).indexOf(e.id) !== -1; }).length;
+    const commissionPerClient = e.rol === 'peluquera' ? 100 : e.rol === 'empleado' ? 80 : (e.comision || 0);
+    return '<div class="employee-card" style="display:block;padding:20px"><div style="display:flex;align-items:center;margin-bottom:15px"><div class="client-avatar" style="background:' + getAvatarColor(e.nombre || '') + '">' + getInitials(e.nombre || '?') + '</div><div class="employee-info" style="flex:1"><div class="employee-name">' + (e.nombre || '') + ' ' + (e.apellidos || '') + '</div><div class="employee-phone">' + (e.rol === 'peluquera' ? 'Peluquera' : 'Empleado') + ' • ' + formatMoney(commissionPerClient) + '/clienta</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px"><div class="commission-box today"><div style="font-size:11px;color:var(--text-light);margin-bottom:5px">📅 HOY</div><div style="font-size:22px;font-weight:700;color:var(--info)">' + todayCount + '</div><div style="font-size:12px;color:var(--text-light);margin-top:3px">' + formatMoney(todayCount * commissionPerClient) + '</div></div><div class="commission-box month"><div style="font-size:11px;color:var(--text-light);margin-bottom:5px">📆 MES</div><div style="font-size:22px;font-weight:700;color:var(--warning)">' + monthCount + '</div><div style="font-size:12px;color:var(--text-light);margin-top:3px">' + formatMoney(monthCount * commissionPerClient) + '</div></div><div class="commission-box total"><div style="font-size:11px;color:var(--text-light);margin-bottom:5px">💰 ACUMULADO</div><div style="font-size:22px;font-weight:700;color:var(--success)">' + totalCount + '</div><div style="font-size:12px;color:var(--text-light);margin-top:3px">' + formatMoney(totalCount * commissionPerClient) + '</div></div></div></div>';
+  }).join('');
+  document.getElementById('commissionsList').innerHTML = html;
+}
+
+function switchEmployeeTab(tab) {
+  currentEmployeeTab = tab;
+  document.querySelectorAll('#page-employees .tab').forEach(function(t) { t.classList.remove('active'); });
+  if (tab === 'list') { document.getElementById('tabEmpList').classList.add('active'); document.getElementById('employeeListTab').style.display = 'block'; document.getElementById('employeeCommissionsTab').style.display = 'none'; }
+  else { document.getElementById('tabEmpCom').classList.add('active'); document.getElementById('employeeListTab').style.display = 'none'; document.getElementById('employeeCommissionsTab').style.display = 'block'; }
+  renderEmployees();
+}
+
+function openNewEmployee() {
+  const body = '<div class="form-group"><label class="form-label">Nombre *</label><input type="text" class="form-input" id="empName" placeholder="Nombre"></div><div class="form-group"><label class="form-label">Apellidos</label><input type="text" class="form-input" id="empLastName" placeholder="Apellidos"></div><div class="form-group"><label class="form-label">Teléfono</label><input type="tel" class="form-input" id="empPhone" placeholder="Teléfono"></div><div class="form-group"><label class="form-label">Rol *</label><select class="form-select" id="empRole" onchange="updateCommissionPreview()"><option value="peluquera">Peluquera (100 CUP/clienta)</option><option value="empleado">Empleado (80 CUP/clienta)</option><option value="otro">Otro</option></select></div><div class="form-group"><label class="form-label">Comisión personalizada (CUP/clienta)</label><input type="number" class="form-input" id="empCommission" placeholder="Automática según rol" oninput="updateCommissionPreview()"><div style="font-size:12px;color:var(--text-light);margin-top:5px">Deja vacío para usar la comisión automática del rol</div></div><div style="background:var(--bg);padding:12px;border-radius:8px;margin-bottom:15px"><div style="display:flex;justify-content:space-between"><span>Comisión:</span><strong id="commissionPreview" style="color:var(--success)">CUP 100/clienta</strong></div></div><button class="btn btn-primary btn-full" onclick="saveEmployee()">💾 Guardar</button>';
+  openModal('Nuevo Empleado', body);
+}
+
+function updateCommissionPreview() {
+  const role = document.getElementById('empRole').value;
+  const custom = document.getElementById('empCommission').value;
+  let preview;
+  if (custom) preview = formatMoney(Number(custom)) + '/clienta (personalizada)';
+  else if (role === 'peluquera') preview = 'CUP 100/clienta';
+  else if (role === 'empleado') preview = 'CUP 80/clienta';
+  else preview = 'CUP 0/clienta';
+  document.getElementById('commissionPreview').textContent = preview;
+}
+
+function saveEmployee() {
+  const name = document.getElementById('empName').value.trim();
+  if (!name) { showToast('El nombre es obligatorio', 'error'); return; }
+  const role = document.getElementById('empRole').value;
+  const customCommission = document.getElementById('empCommission').value;
+  let commission;
+  if (customCommission) commission = Number(customCommission);  else if (role === 'peluquera') commission = 100;
+  else if (role === 'empleado') commission = 80;
+  else commission = 0;
+  const employee = { id: generateId(), nombre: name, apellidos: document.getElementById('empLastName').value.trim(), telefono: document.getElementById('empPhone').value.trim(), rol: role, comision: commission, activo: true };
+  data.employees.push(employee); saveData(); closeModal(); renderAll(); showToast('Empleado registrado');
+}
+
+function editEmployee(id) {
+  const e = data.employees.find(function(x) { return x.id === id; });
+  if (!e) return;
+  const body = '<div class="form-group"><label class="form-label">Nombre</label><input type="text" class="form-input" id="editEmpName" value="' + (e.nombre || '') + '"></div><div class="form-group"><label class="form-label">Apellidos</label><input type="text" class="form-input" id="editEmpLastName" value="' + (e.apellidos || '') + '"></div><div class="form-group"><label class="form-label">Teléfono</label><input type="tel" class="form-input" id="editEmpPhone" value="' + (e.telefono || '') + '"></div><div class="form-group"><label class="form-label">Rol</label><select class="form-select" id="editEmpRole"><option value="peluquera"' + (e.rol === 'peluquera' ? ' selected' : '') + '>Peluquera (100 CUP/clienta)</option><option value="empleado"' + (e.rol === 'empleado' ? ' selected' : '') + '>Empleado (80 CUP/clienta)</option><option value="otro"' + (e.rol === 'otro' ? ' selected' : '') + '>Otro</option></select></div><div class="form-group"><label class="form-label">Comisión (CUP/clienta)</label><input type="number" class="form-input" id="editEmpCommission" value="' + (e.comision || 0) + '"></div><button class="btn btn-primary btn-full" onclick="updateEmployee(\'' + id + '\')">💾 Actualizar</button>';
+  openModal('Editar Empleado', body);
+}
+
+function updateEmployee(id) {
+  const e = data.employees.find(function(x) { return x.id === id; });
+  if (!e) return;
+  e.nombre = document.getElementById('editEmpName').value.trim();
+  e.apellidos = document.getElementById('editEmpLastName').value.trim();
+  e.telefono = document.getElementById('editEmpPhone').value.trim();
+  e.rol = document.getElementById('editEmpRole').value;
+  e.comision = Number(document.getElementById('editEmpCommission').value) || 0;
+  saveData(); closeModal(); renderAll(); showToast('Empleado actualizado');
+}
+
+function toggleEmployee(id) { const e = data.employees.find(function(x) { return x.id === id; }); if (!e) return; e.activo = e.activo === false ? true : false; saveData(); renderAll(); }
+function deleteEmployee(id) { if (!confirm('¿Eliminar este empleado?')) return; data.employees = data.employees.filter(function(e) { return e.id !== id; }); saveData(); renderAll(); showToast('Empleado eliminado'); }
+
+function renderInventory() {
+  const lowStock = data.products.filter(function(p) { return (p.stock || 0) <= (p.stockMinimo || 5); });
+  const totalValue = data.products.reduce(function(s, p) { return s + ((p.stock || 0) * safeNumber(p.precio)); }, 0);
+  document.getElementById('totalProducts').textContent = data.products.length;
+  document.getElementById('lowStockProducts').textContent = lowStock.length;
+  document.getElementById('inventoryValue').textContent = formatMoney(totalValue);
+  const lowHtml = lowStock.length === 0 ? '<div class="empty-state">✅ No hay productos con stock bajo</div>' : lowStock.map(function(p) { return '<div class="inventory-item stock-low"><div><div style="font-weight:600">' + p.nombre + '</div><div style="color:var(--danger);font-size:13px">' + (p.stock || 0) + ' unidades (mín: ' + (p.stockMinimo || 5) + ')</div></div><button class="btn btn-sm btn-success" onclick="addStock(\'' + p.id + '\')">+ Agregar</button></div>'; }).join('');
+  document.getElementById('lowStockList').innerHTML = lowHtml;
+  const html = data.products.length === 0 ? '<div class="empty-state"><div class="icon">📦</div>No hay productos</div>' : data.products.map(function(p) {
+    const isLow = (p.stock || 0) <= (p.stockMinimo || 5);
+    return '<div class="inventory-item ' + (isLow ? 'stock-low' : 'stock-ok') + '"><div><div style="font-weight:600">' + p.nombre + '</div><div style="font-size:13px;color:var(--text-light)">Stock: ' + (p.stock || 0) + ' | Mín: ' + (p.stockMinimo || 5) + ' | ' + formatMoney(p.precio || 0) + '</div></div><div style="display:flex;gap:5px"><button class="btn btn-sm btn-success" onclick="addStock(\'' + p.id + '\')">+</button><button class="icon-btn edit" onclick="editProduct(\'' + p.id + '\')">✎</button><button class="icon-btn danger" onclick="deleteProduct(\'' + p.id + '\')">🗑</button></div></div>';
+  }).join('');
+  document.getElementById('productList').innerHTML = html;
+}
+
+function openNewProduct() {
+  const body = '<div class="form-group"><label class="form-label">Nombre *</label><input type="text" class="form-input" id="prodName" placeholder="Nombre del producto"></div><div class="form-group"><label class="form-label">Stock actual</label><input type="number" class="form-input" id="prodStock" placeholder="0"></div><div class="form-group"><label class="form-label">Stock mínimo</label><input type="number" class="form-input" id="prodMinStock" placeholder="5"></div><div class="form-group"><label class="form-label">Precio unitario (CUP)</label><input type="number" class="form-input" id="prodPrice" placeholder="0"></div><div class="form-group"><label class="form-label">Categoría</label><input type="text" class="form-input" id="prodCategory" placeholder="Ej: Tintes, Herramientas..."></div><button class="btn btn-primary btn-full" onclick="saveProduct()">💾 Guardar</button>';
+  openModal('Nuevo Producto', body);
+}
+
+function saveProduct() {
+  const name = document.getElementById('prodName').value.trim();  if (!name) { showToast('El nombre es obligatorio', 'error'); return; }
+  const product = { id: generateId(), nombre: name, stock: Number(document.getElementById('prodStock').value) || 0, stockMinimo: Number(document.getElementById('prodMinStock').value) || 5, precio: Number(document.getElementById('prodPrice').value) || 0, categoria: document.getElementById('prodCategory').value.trim() };
+  data.products.push(product); saveData(); closeModal(); renderAll(); showToast('Producto agregado');
+}
+
+function addStock(id) { const amount = prompt('¿Cuántas unidades agregar?'); if (!amount || isNaN(amount)) return; const p = data.products.find(function(x) { return x.id === id; }); if (!p) return; p.stock = (p.stock || 0) + Number(amount); saveData(); renderAll(); showToast('Stock actualizado'); }
+
+function editProduct(id) {
+  const p = data.products.find(function(x) { return x.id === id; });
+  if (!p) return;
+  const body = '<div class="form-group"><label class="form-label">Nombre</label><input type="text" class="form-input" id="editProdName" value="' + p.nombre + '"></div><div class="form-group"><label class="form-label">Stock</label><input type="number" class="form-input" id="editProdStock" value="' + (p.stock || 0) + '"></div><div class="form-group"><label class="form-label">Stock mínimo</label><input type="number" class="form-input" id="editProdMinStock" value="' + (p.stockMinimo || 5) + '"></div><div class="form-group"><label class="form-label">Precio</label><input type="number" class="form-input" id="editProdPrice" value="' + (p.precio || 0) + '"></div><div class="form-group"><label class="form-label">Categoría</label><input type="text" class="form-input" id="editProdCategory" value="' + (p.categoria || '') + '"></div><button class="btn btn-primary btn-full" onclick="updateProduct(\'' + id + '\')">💾 Actualizar</button>';
+  openModal('Editar Producto', body);
+}
+
+function updateProduct(id) {
+  const p = data.products.find(function(x) { return x.id === id; });
+  if (!p) return;
+  p.nombre = document.getElementById('editProdName').value.trim();
+  p.stock = Number(document.getElementById('editProdStock').value) || 0;
+  p.stockMinimo = Number(document.getElementById('editProdMinStock').value) || 5;
+  p.precio = Number(document.getElementById('editProdPrice').value) || 0;
+  p.categoria = document.getElementById('editProdCategory').value.trim();
+  saveData(); closeModal(); renderAll(); showToast('Producto actualizado');
+}
+
+function deleteProduct(id) { if (!confirm('¿Eliminar este producto?')) return; data.products = data.products.filter(function(p) { return p.id !== id; }); saveData(); renderAll(); showToast('Producto eliminado'); }
+
+function renderFinance() {
+  const month = document.getElementById('financeMonth').value;
+  const monthTrans = data.transactions.filter(function(t) { return t.fecha && t.fecha.startsWith(month); });
+  const income = monthTrans.filter(function(t) { return t.tipo === 'income'; }).reduce(function(s, t) { return s + safeNumber(t.monto); }, 0);
+  const expenses = monthTrans.filter(function(t) { return t.tipo === 'expense'; }).reduce(function(s, t) { return s + safeNumber(t.monto); }, 0);
+  document.getElementById('finIncome').textContent = formatMoney(income);
+  document.getElementById('finExpenses').textContent = formatMoney(expenses);
+  document.getElementById('finBalance').textContent = formatMoney(income - expenses);
+  let filtered = monthTrans;
+  if (currentTransactionFilter === 'income') filtered = monthTrans.filter(function(t) { return t.tipo === 'income'; });
+  if (currentTransactionFilter === 'expense') filtered = monthTrans.filter(function(t) { return t.tipo === 'expense'; });
+  filtered.sort(function(a, b) { return (b.fecha || '').localeCompare(a.fecha || ''); });
+  const html = filtered.length === 0 ? '<div class="empty-state"><div class="icon"></div>No hay transacciones este mes</div>' : filtered.map(function(t) {
+    const clienteDisplay = t.clienteNombre ? '<div style="font-size:12px;color:var(--primary);margin-top:4px">👤 ' + t.clienteNombre + '</div>' : '';
+    return '<div class="transaction-item ' + (t.tipo === 'income' ? 'transaction-income' : 'transaction-expense') + '"><div><div style="font-weight:600">' + (t.descripcion || 'Sin descripción') + '</div>' + clienteDisplay + '<div style="font-size:12px;color:var(--text-light)">' + formatDate(t.fecha) + (t.categoria ? ' • ' + t.categoria : '') + (t.metodoPago ? ' • ' + t.metodoPago : '') + '</div></div><div style="text-align:right"><div style="font-weight:700;color:' + (t.tipo === 'income' ? 'var(--success)' : 'var(--danger)') + '">' + (t.tipo === 'income' ? '+' : '-') + formatMoney(t.monto) + '</div><div style="display:flex;gap:5px;margin-top:5px;justify-content:flex-end"><button class="btn btn-sm btn-info" onclick="editTransaction(\'' + t.id + '\')">✎ Editar</button><button class="btn btn-sm btn-danger" onclick="deleteTransaction(\'' + t.id + '\')">🗑</button></div></div></div>';
+  }).join('');
+  document.getElementById('transactionList').innerHTML = html;
+}
+
+function filterTransactions(type) {
+  currentTransactionFilter = type;
+  document.querySelectorAll('#page-finance .tab').forEach(function(t) { t.classList.remove('active'); });
+  if (type === 'all') document.getElementById('tabTransAll').classList.add('active');  if (type === 'income') document.getElementById('tabTransInc').classList.add('active');
+  if (type === 'expense') document.getElementById('tabTransExp').classList.add('active');
+  renderFinance();
+}
+
+function openNewTransaction(type, transId) {
+  const today = new Date().toISOString().split('T')[0];
+  let trans = { tipo: type, monto: 0, descripcion: '', categoria: '', metodoPago: 'efectivo', fecha: today, clienteNombre: '' };
+  if (transId) {
+    const existing = data.transactions.find(function(t) { return t.id === transId; });
+    if (existing) trans = existing;
+  }
+  const isEdit = !!transId;
+  const sortedClients = data.clients.slice().sort(function(a, b) { return ((a.nombre || '') + ' ' + (a.apellidos || '')).localeCompare((b.nombre || '') + ' ' + (b.apellidos || '')); });
+  const body = '<div class="form-group"><label class="form-label">Tipo</label><select class="form-select" id="transType"><option value="income"' + (trans.tipo === 'income' ? ' selected' : '') + '>📈 Ingreso</option><option value="expense"' + (trans.tipo === 'expense' ? ' selected' : '') + '>📉 Gasto</option></select></div>' +
+    '<div class="form-group"><label class="form-label">Clienta asociada (opcional)</label><select class="form-select" id="transClient"><option value="">-- Sin clienta asociada --</option>' + sortedClients.map(function(c) {
+      const nombreCompleto = (c.nombre || '') + ' ' + (c.apellidos || '');
+      return '<option value="' + nombreCompleto + '"' + ((trans.clienteNombre || '') === nombreCompleto ? ' selected' : '') + '>' + nombreCompleto + (c.telefono ? ' - ' + c.telefono : '') + '</option>';
+    }).join('') + '</select><div style="font-size:12px;color:var(--text-light);margin-top:5px"> Selecciona la clienta si esta transacción está relacionada con un servicio</div></div>' +
+    '<div class="form-group"><label class="form-label">Monto (CUP) *</label><input type="number" class="form-input" id="transAmount" value="' + (trans.monto || '') + '" placeholder="0"></div>' +
+    '<div class="form-group"><label class="form-label">Descripción</label><input type="text" class="form-input" id="transDesc" value="' + (trans.descripcion || '') + '" placeholder="Descripción"></div>' +
+    '<div class="form-group"><label class="form-label">Categoría</label><input type="text" class="form-input" id="transCategory" value="' + (trans.categoria || '') + '" placeholder="Ej: Servicios, Productos, Sueldo..."></div>' +
+    '<div class="form-group"><label class="form-label">Método de pago</label><select class="form-select" id="transMethod"><option value="efectivo"' + (trans.metodoPago === 'efectivo' ? ' selected' : '') + '>Efectivo</option><option value="tarjeta"' + (trans.metodoPago === 'tarjeta' ? ' selected' : '') + '>Tarjeta</option><option value="transferencia"' + (trans.metodoPago === 'transferencia' ? ' selected' : '') + '>Transferencia</option><option value="otro"' + (trans.metodoPago === 'otro' ? ' selected' : '') + '>Otro</option></select></div>' +
+    '<div class="form-group"><label class="form-label">Fecha</label><input type="date" class="form-input" id="transDate" value="' + (trans.fecha || today) + '"></div>' +
+    '<button class="btn btn-primary btn-full" onclick="saveTransaction(' + (isEdit ? '\'' + transId + '\'' : 'null') + ')">💾 ' + (isEdit ? 'Actualizar' : 'Guardar') + '</button>';
+  openModal(isEdit ? 'Editar Transacción' : (type === 'income' ? 'Nuevo Ingreso' : 'Nuevo Gasto'), body);
+}
+
+function saveTransaction(editId) {
+  const amount = Number(document.getElementById('transAmount').value);
+  if (!amount || amount <= 0) { showToast('Monto inválido', 'error'); return; }
+  const transData = {
+    tipo: document.getElementById('transType').value,
+    monto: amount,
+    descripcion: document.getElementById('transDesc').value.trim(),
+    categoria: document.getElementById('transCategory').value.trim(),
+    metodoPago: document.getElementById('transMethod').value,
+    fecha: document.getElementById('transDate').value,
+    clienteNombre: document.getElementById('transClient').value || ''
+  };
+  if (editId) {
+    const trans = data.transactions.find(function(t) { return t.id === editId; });
+    if (trans) { Object.assign(trans, transData); }
+    showToast('Transacción actualizada');
+  } else {
+    transData.id = generateId();
+    data.transactions.push(transData);
+    showToast('Transacción registrada');
+  }
+  saveData(); closeModal(); renderAll();}
+
+function editTransaction(id) { openNewTransaction(null, id); }
+function deleteTransaction(id) { if (!confirm('¿Eliminar esta transacción?')) return; data.transactions = data.transactions.filter(function(t) { return t.id !== id; }); saveData(); renderAll(); showToast('Transacción eliminada'); }
+
+function renderNotes() {
+  const search = (document.getElementById('noteSearch') ? document.getElementById('noteSearch').value : '').toLowerCase();
+  let filtered = data.notes.filter(function(n) { 
+    return (n.titulo || '').toLowerCase().indexOf(search) !== -1 || 
+           (n.descripcion || '').toLowerCase().indexOf(search) !== -1 || 
+           (n.clienteNombre || '').toLowerCase().indexOf(search) !== -1; 
+  });
+  if (currentNoteFilter !== 'all') {
+    var filtroTipo = normalizeTipo(currentNoteFilter);
+    filtered = filtered.filter(function(n) { return normalizeTipo(n.tipo) === filtroTipo; });
+  }
+  const debts = data.notes.filter(function(n) { return normalizeTipo(n.tipo) === 'debt' && !n.pagada; });
+  const totalDebt = debts.reduce(function(s, n) { return s + safeNumber(n.monto); }, 0);
+  document.getElementById('pendingNotes').textContent = data.notes.filter(function(n) { return !n.pagada && !n.completada; }).length;
+  document.getElementById('debtNotes').textContent = debts.length;
+  document.getElementById('urgentNotes').textContent = data.notes.filter(function(n) { return normalizeTipo(n.tipo) === 'urgent'; }).length;
+  document.getElementById('totalDebtAmount').textContent = formatMoney(totalDebt);
+  const html = filtered.length === 0 ? '<div class="empty-state"><div class="icon">📝</div>No hay notas</div>' : filtered.map(function(n) {
+    var tipo = normalizeTipo(n.tipo);
+    var typeClass = tipo === 'debt' ? 'debt' : (tipo === 'urgent' ? 'urgent' : 'reminder');
+    var typeLabel = tipo === 'debt' ? 'Deuda' : (tipo === 'urgent' ? 'Urgente' : 'Recordatorio');
+    return '<div class="note-card ' + typeClass + '"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><strong>' + (n.titulo || 'Sin título') + '</strong><span class="note-type ' + typeClass + '">' + typeLabel + '</span></div>' +
+      (n.clienteNombre ? '<div style="font-size:13px;color:var(--text-light);margin-top:4px">👤 ' + n.clienteNombre + '</div>' : '') +
+      (n.descripcion ? '<div style="font-size:13px;margin-top:6px">' + n.descripcion + '</div>' : '') +
+      (n.monto ? '<div style="font-weight:700;color:var(--danger);margin-top:6px">' + formatMoney(n.monto) + '</div>' : '') +
+      '<div style="font-size:11px;color:var(--text-light);margin-top:6px">' + formatDate(n.fecha) + '</div></div><div style="display:flex;gap:5px">' +
+      (!n.pagada && !n.completada ? '<button class="icon-btn success" onclick="completeNote(\'' + n.id + '\')">✓</button>' : '') +
+      '<button class="icon-btn edit" onclick="editNote(\'' + n.id + '\')">✎</button><button class="icon-btn danger" onclick="deleteNote(\'' + n.id + '\')">🗑</button></div></div></div>';
+  }).join('');
+  document.getElementById('noteList').innerHTML = html;
+}
+
+function filterNotes(type) {
+  currentNoteFilter = type;
+  document.querySelectorAll('#page-notes .tab').forEach(function(t) { t.classList.remove('active'); });
+  if (type === 'all') document.getElementById('tabNoteAll').classList.add('active');
+  if (type === 'debt') document.getElementById('tabNoteDebt').classList.add('active');
+  if (type === 'urgent') document.getElementById('tabNoteUrg').classList.add('active');
+  if (type === 'reminder') document.getElementById('tabNoteRec').classList.add('active');
+  renderNotes();
+}
+
+function openNewNote() {
+  const clientOptions = data.clients.map(function(c) { return '<option value="' + (c.nombre || '') + ' ' + (c.apellidos || '') + '">' + (c.nombre || '') + ' ' + (c.apellidos || '') + '</option>'; }).join('');
+  const body = '<div class="form-group"><label class="form-label">Tipo *</label><select class="form-select" id="noteType"><option value="debt">💰 Deuda</option><option value="urgent">️ Urgente</option><option value="reminder">📌 Recordatorio</option></select></div><div class="form-group"><label class="form-label">Título *</label><input type="text" class="form-input" id="noteTitle" placeholder="Título"></div><div class="form-group"><label class="form-label">Clienta (opcional)</label><select class="form-select" id="noteClient"><option value="">-- Sin clienta --</option>' + clientOptions + '</select></div><div class="form-group"><label class="form-label">Monto (CUP)</label><input type="number" class="form-input" id="noteAmount" placeholder="0"></div><div class="form-group"><label class="form-label">Descripción</label><textarea class="form-textarea" id="noteDesc" placeholder="Descripción"></textarea></div><button class="btn btn-primary btn-full" onclick="saveNote()">💾 Guardar</button>';  openModal('Nueva Nota', body);
+}
+
+function saveNote() {
+  const title = document.getElementById('noteTitle').value.trim();
+  if (!title) { showToast('El título es obligatorio', 'error'); return; }
+  const note = { id: generateId(), tipo: normalizeTipo(document.getElementById('noteType').value), titulo: title, clienteNombre: document.getElementById('noteClient').value, monto: Number(document.getElementById('noteAmount').value) || 0, descripcion: document.getElementById('noteDesc').value.trim(), fecha: new Date().toISOString().split('T')[0], pagada: false, completada: false };
+  data.notes.push(note); saveData(); closeModal(); renderAll(); showToast('Nota creada');
+}
+
+function editNote(id) {
+  const n = data.notes.find(function(x) { return x.id === id; });
+  if (!n) return;
+  const clientOptions = data.clients.map(function(c) { return '<option value="' + (c.nombre || '') + ' ' + (c.apellidos || '') + '"' + ((n.clienteNombre || '') === ((c.nombre || '') + ' ' + (c.apellidos || '')) ? ' selected' : '') + '>' + (c.nombre || '') + ' ' + (c.apellidos || '') + '</option>'; }).join('');
+  const body = '<div class="form-group"><label class="form-label">Tipo</label><select class="form-select" id="editNoteType"><option value="debt"' + (normalizeTipo(n.tipo) === 'debt' ? ' selected' : '') + '>Deuda</option><option value="urgent"' + (normalizeTipo(n.tipo) === 'urgent' ? ' selected' : '') + '>Urgente</option><option value="reminder"' + (normalizeTipo(n.tipo) === 'reminder' ? ' selected' : '') + '>Recordatorio</option></select></div><div class="form-group"><label class="form-label">Título</label><input type="text" class="form-input" id="editNoteTitle" value="' + (n.titulo || '') + '"></div><div class="form-group"><label class="form-label">Clienta</label><select class="form-select" id="editNoteClient"><option value="">-- Sin clienta --</option>' + clientOptions + '</select></div><div class="form-group"><label class="form-label">Monto</label><input type="number" class="form-input" id="editNoteAmount" value="' + (n.monto || 0) + '"></div><div class="form-group"><label class="form-label">Descripción</label><textarea class="form-textarea" id="editNoteDesc">' + (n.descripcion || '') + '</textarea></div><button class="btn btn-primary btn-full" onclick="updateNote(\'' + id + '\')"> Actualizar</button>';
+  openModal('Editar Nota', body);
+}
+
+function updateNote(id) {
+  const n = data.notes.find(function(x) { return x.id === id; });
+  if (!n) return;
+  n.tipo = normalizeTipo(document.getElementById('editNoteType').value);
+  n.titulo = document.getElementById('editNoteTitle').value.trim();
+  n.clienteNombre = document.getElementById('editNoteClient').value;
+  n.monto = Number(document.getElementById('editNoteAmount').value) || 0;
+  n.descripcion = document.getElementById('editNoteDesc').value.trim();
+  saveData(); closeModal(); renderAll(); showToast('Nota actualizada');
+}
+
+function completeNote(id) {
+  const n = data.notes.find(function(x) { return x.id === id; });
+  if (!n) return;
+  if (normalizeTipo(n.tipo) === 'debt') {
+    n.pagada = true;
+    if (n.monto > 0) data.transactions.push({ id: generateId(), tipo: 'income', monto: n.monto, descripcion: 'Pago de deuda: ' + n.titulo + ' - ' + (n.clienteNombre || ''), fecha: new Date().toISOString().split('T')[0], categoria: 'Cobro de deudas', clienteNombre: n.clienteNombre });
+  } else { n.completada = true; }
+  saveData(); renderAll(); showToast('Nota completada');
+}
+
+function deleteNote(id) { if (!confirm('¿Eliminar esta nota?')) return; data.notes = data.notes.filter(function(n) { return n.id !== id; }); saveData(); renderAll(); showToast('Nota eliminada'); }
+
+// ✅ REPORTES CORREGIDO - SIN DUPLICACIÓN DE INGRESOS
+function renderReports() {
+  const start = document.getElementById('reportStartDate').value;
+  const end = document.getElementById('reportEndDate').value;
+  if (!start || !end) return;
+  
+  const rangeAppts = data.appointments.filter(function(a) { return a.fecha >= start && a.fecha <= end; });
+  const completedAppts = rangeAppts.filter(function(a) { return normalizeTipo(a.estado) === 'completada'; });
+  const cancelledAppts = rangeAppts.filter(function(a) { return normalizeTipo(a.estado) === 'cancelada'; });  const noShowAppts = rangeAppts.filter(function(a) { return normalizeTipo(a.estado) === 'no_show'; });
+  const pendingAppts = rangeAppts.filter(function(a) { return normalizeTipo(a.estado) === 'pendiente'; });
+  
+  document.getElementById('repTotalAppts').textContent = rangeAppts.length;
+  document.getElementById('repCompletedAppts').textContent = completedAppts.length;
+  document.getElementById('repCancelledAppts').textContent = cancelledAppts.length;
+  document.getElementById('repNoShowAppts').textContent = noShowAppts.length;
+  
+  const total = rangeAppts.length || 1;
+  const statuses = [
+    { label: 'Completadas', count: completedAppts.length, color: 'var(--success)' },
+    { label: 'Pendientes', count: pendingAppts.length, color: 'var(--warning)' },
+    { label: 'Canceladas', count: cancelledAppts.length, color: '#6b7280' },
+    { label: 'No-Show', count: noShowAppts.length, color: 'var(--danger)' }
+  ];
+  const apptChartHtml = statuses.map(function(s) {
+    const pct = Math.round((s.count / total) * 100);
+    return '<div class="legend-item"><div class="legend-color" style="background:' + s.color + '"></div><span style="flex:1">' + s.label + '</span><span class="legend-value">' + s.count + ' (' + pct + '%)</span></div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;background:' + s.color + '">' + (pct > 10 ? pct + '%' : '') + '</div></div>';
+  }).join('');
+  document.getElementById('apptStatusChart').innerHTML = apptChartHtml;
+  
+  // ✅ CORRECCIÓN: Ingresos SOLO desde transacciones (no duplicar con citas)
+  const income = data.transactions.filter(function(t) { return t.tipo === 'income' && t.fecha >= start && t.fecha <= end; }).reduce(function(s, t) { return s + safeNumber(t.monto); }, 0);
+  const expenses = data.transactions.filter(function(t) { return t.tipo === 'expense' && t.fecha >= start && t.fecha <= end; }).reduce(function(s, t) { return s + safeNumber(t.monto); }, 0);
+  const newClients = data.clients.filter(function(c) { return c.fechaRegistro >= start && c.fechaRegistro <= end; }).length;
+  const avgPerAppt = completedAppts.length > 0 ? income / completedAppts.length : 0;
+  
+  document.getElementById('repIncome').textContent = formatMoney(income);
+  document.getElementById('repExpenses').textContent = formatMoney(expenses);
+  document.getElementById('repBalance').textContent = formatMoney(income - expenses);
+  document.getElementById('repAvgPerAppt').textContent = formatMoney(Math.round(avgPerAppt));
+  document.getElementById('repTotalServices').textContent = data.services.length;
+  document.getElementById('repNewClients').textContent = newClients;
+  
+  const days = [];
+  const d = new Date(start);
+  const endD = new Date(end);
+  while (d <= endD) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); }
+  const last7 = days.slice(-7);
+  
+  // ✅ CORRECCIÓN: dayIncome también solo de transacciones
+  const maxVal = Math.max.apply(null, last7.map(function(day) {
+    const dayIncome = data.transactions.filter(function(t) { return t.tipo === 'income' && t.fecha === day; }).reduce(function(s, t) { return s + safeNumber(t.monto); }, 0);
+    const dayExpense = data.transactions.filter(function(t) { return t.tipo === 'expense' && t.fecha === day; }).reduce(function(s, t) { return s + safeNumber(t.monto); }, 0);
+    return Math.max(dayIncome, dayExpense);
+  }).concat([1]));
+  
+  const barHtml = last7.map(function(day) {
+    const dayIncome = data.transactions.filter(function(t) { return t.tipo === 'income' && t.fecha === day; }).reduce(function(s, t) { return s + safeNumber(t.monto); }, 0);
+    const dayExpense = data.transactions.filter(function(t) { return t.tipo === 'expense' && t.fecha === day; }).reduce(function(s, t) { return s + safeNumber(t.monto); }, 0);    const dObj = new Date(day + 'T00:00:00');
+    const label = dObj.toLocaleDateString('es-CU', { day: '2-digit', month: 'short' });
+    return '<div class="bar-group"><div style="display:flex;align-items:flex-end;height:180px"><div class="bar income" style="height:' + ((dayIncome / maxVal) * 170) + 'px" title="Ingresos: ' + formatMoney(dayIncome) + '"></div><div class="bar expense" style="height:' + ((dayExpense / maxVal) * 170) + 'px" title="Gastos: ' + formatMoney(dayExpense) + '"></div></div><div class="bar-label">' + label + '</div></div>';
+  }).join('');
+  document.getElementById('barChart').innerHTML = barHtml;
+  
+  const incomeByCategory = {};
+  data.transactions.filter(function(t) { return t.tipo === 'income' && t.fecha >= start && t.fecha <= end; }).forEach(function(t) {
+    const cat = t.categoria || 'Otros';
+    incomeByCategory[cat] = (incomeByCategory[cat] || 0) + safeNumber(t.monto);
+  });
+  const totalIncomeCat = Object.values(incomeByCategory).reduce(function(s, v) { return s + v; }, 0) || 1;
+  const incomeCatHtml = Object.keys(incomeByCategory).length === 0 ? '<div class="empty-state">No hay datos</div>' : Object.keys(incomeByCategory).map(function(cat) {
+    const pct = Math.round((incomeByCategory[cat] / totalIncomeCat) * 100);
+    return '<div class="legend-item"><div class="legend-color" style="background:var(--success)"></div><span style="flex:1">' + cat + '</span><span class="legend-value">' + formatMoney(incomeByCategory[cat]) + ' (' + pct + '%)</span></div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;background:var(--success)">' + (pct > 10 ? pct + '%' : '') + '</div></div>';
+  }).join('');
+  document.getElementById('incomeCategoryChart').innerHTML = incomeCatHtml;
+  
+  const expenseByCategory = {};
+  data.transactions.filter(function(t) { return t.tipo === 'expense' && t.fecha >= start && t.fecha <= end; }).forEach(function(t) {
+    const cat = t.categoria || 'Otros';
+    expenseByCategory[cat] = (expenseByCategory[cat] || 0) + safeNumber(t.monto);
+  });
+  const totalExpenseCat = Object.values(expenseByCategory).reduce(function(s, v) { return s + v; }, 0) || 1;
+  const expenseCatHtml = Object.keys(expenseByCategory).length === 0 ? '<div class="empty-state">No hay datos</div>' : Object.keys(expenseByCategory).map(function(cat) {
+    const pct = Math.round((expenseByCategory[cat] / totalExpenseCat) * 100);
+    return '<div class="legend-item"><div class="legend-color" style="background:var(--danger)"></div><span style="flex:1">' + cat + '</span><span class="legend-value">' + formatMoney(expenseByCategory[cat]) + ' (' + pct + '%)</span></div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;background:var(--danger)">' + (pct > 10 ? pct + '%' : '') + '</div></div>';
+  }).join('');
+  document.getElementById('expenseCategoryChart').innerHTML = expenseCatHtml;
+  
+  const serviceStats = {};
+  completedAppts.forEach(function(a) {
+    (a.servicios || []).forEach(function(sId) {
+      const s = data.services.find(function(x) { return x.id === sId; });
+      if (!s) return;
+      if (!serviceStats[sId]) serviceStats[sId] = { nombre: s.nombre, cantidad: 0, ingresos: 0 };
+      serviceStats[sId].cantidad++;
+      serviceStats[sId].ingresos += safeNumber(a.precioTotal) / (a.servicios.length || 1);
+    });
+  });
+  const sortedServices = Object.keys(serviceStats).map(function(id) { return { id: id, nombre: serviceStats[id].nombre, cantidad: serviceStats[id].cantidad, ingresos: serviceStats[id].ingresos }; }).sort(function(a, b) { return b.cantidad - a.cantidad; });
+  const maxServiceQty = sortedServices.length > 0 ? sortedServices[0].cantidad : 1;
+  const maxServiceInc = sortedServices.length > 0 ? Math.max.apply(null, sortedServices.map(function(s) { return s.ingresos; })) : 1;
+  const serviceQtyHtml = sortedServices.length === 0 ? '<div class="empty-state">No hay datos</div>' : sortedServices.map(function(s) {
+    const pct = Math.round((s.cantidad / maxServiceQty) * 100);
+    return '<div class="legend-item"><div class="legend-color" style="background:var(--warning)"></div><span style="flex:1">' + s.nombre + '</span><span class="legend-value">' + s.cantidad + ' realizados</span></div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;background:var(--warning)">' + (pct > 10 ? s.cantidad : '') + '</div></div>';
+  }).join('');
+  document.getElementById('serviceQuantityChart').innerHTML = serviceQtyHtml;
+  const serviceIncHtml = sortedServices.length === 0 ? '<div class="empty-state">No hay datos</div>' : sortedServices.map(function(s) {
+    const pct = Math.round((s.ingresos / maxServiceInc) * 100);    return '<div class="legend-item"><div class="legend-color" style="background:var(--success)"></div><span style="flex:1">' + s.nombre + '</span><span class="legend-value">' + formatMoney(Math.round(s.ingresos)) + '</span></div><div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;background:var(--success)">' + (pct > 10 ? formatMoney(Math.round(s.ingresos)) : '') + '</div></div>';
+  }).join('');
+  document.getElementById('serviceIncomeChart').innerHTML = serviceIncHtml;
+}
+
+function importBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      data.clients = imported.clients || imported.clientes || [];
+      data.services = imported.services || imported.servicios || [];
+      data.appointments = imported.appointments || imported.citas || [];
+      data.employees = imported.employees || imported.empleados || [];
+      data.products = imported.products || imported.productos || [];
+      data.notes = (imported.notes || imported.notas || []).map(function(n) { n.tipo = normalizeTipo(n.tipo); return n; });
+      const rawTransactions = imported.transactions || imported.transacciones || [];
+      data.transactions = rawTransactions.map(function(t) {
+        return { id: t.id || generateId(), tipo: normalizeTipo(t.tipo), monto: safeNumber(t.monto), descripcion: t.descripcion || '', categoria: t.categoria || 'Otros', fecha: t.fecha || new Date().toISOString().split('T')[0], metodoPago: t.metodoPago || 'efectivo', clienteNombre: t.clienteNombre || '' };
+      });
+      data.appointments.forEach(function(a) { a.estado = normalizeTipo(a.estado); });
+      saveData(); renderAll();
+      let msg = '✅ Respaldo cargado exitosamente\n\n';
+      msg += '👥 Clientes: ' + data.clients.length + '\n';
+      msg += '📅 Citas: ' + data.appointments.length + '\n';
+      msg += '✂️ Servicios: ' + data.services.length + '\n';
+      msg += '👤 Empleados: ' + data.employees.length + '\n';
+      msg += ' Productos: ' + data.products.length + '\n';
+      msg += '💰 Transacciones: ' + data.transactions.length + '\n';
+      msg += '📝 Notas: ' + data.notes.length;
+      showToast(msg);
+    } catch(err) { showToast('❌ Error: ' + err.message, 'error'); }
+  };
+  reader.readAsText(file);
+}
+
+function exportBackup() {
+  const backup = { version: '2.5', fechaExportacion: new Date().toISOString(), clients: data.clients, services: data.services, appointments: data.appointments, employees: data.employees, products: data.products, transactions: data.transactions, notes: data.notes };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'peluqueria_backup_' + new Date().toISOString().split('T')[0] + '.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Backup descargado');
+}
+
+function exportReport() {
+  const start = document.getElementById('reportStartDate').value;  const end = document.getElementById('reportEndDate').value;
+  const report = { tipo: 'Reporte', periodo: { inicio: start, fin: end }, generado: new Date().toISOString(), datos: data };
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'reporte_' + start + '_' + end + '.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Reporte exportado');
+}
+
+function clearAllData() {
+  if (!confirm('⚠️ ¿Borrar TODOS los datos? Esta acción no se puede deshacer.')) return;
+  if (!confirm('¿Estás completamente segura? Se perderán clientas, citas, empleados, etc.')) return;
+  data = { clients: [], services: [], appointments: [], employees: [], products: [], transactions: [], notes: [] };
+  saveData(); renderAll();
+  showToast('Todos los datos han sido borrados');
+}
+
+function showNotifications() {
+  const lowStock = data.products.filter(function(p) { return (p.stock || 0) <= (p.stockMinimo || 5); });
+  const today = new Date().toISOString().split('T')[0];
+  const todayAppts = data.appointments.filter(function(a) { return a.fecha === today && normalizeTipo(a.estado) === 'pendiente'; });
+  const debts = data.notes.filter(function(n) { return normalizeTipo(n.tipo) === 'debt' && !n.pagada; });
+  let html = '';
+  if (lowStock.length > 0) html += '<div style="padding:12px;background:#fef3c7;border-radius:8px;margin-bottom:10px">⚠️ <strong>' + lowStock.length + ' productos</strong> con stock bajo</div>';
+  if (todayAppts.length > 0) html += '<div style="padding:12px;background:#e0e7ff;border-radius:8px;margin-bottom:10px">📅 <strong>' + todayAppts.length + ' citas</strong> pendientes para hoy</div>';
+  if (debts.length > 0) html += '<div style="padding:12px;background:#fee2e2;border-radius:8px;margin-bottom:10px">💰 <strong>' + debts.length + ' deudas</strong> pendientes por cobrar</div>';
+  if (!html) html = '<div class="empty-state">✅ No hay notificaciones</div>';
+  openModal('🔔 Notificaciones', html);
+}
+
+init();
+</script>
+</body>
+</html>
